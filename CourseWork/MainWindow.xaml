@@ -15,7 +15,18 @@
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Критерий Пирсона" x:Name="tiPearsonChiSquared">
-                <Grid x:Name="grPearsonChiSquared" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Grid ShowGridLines="True">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid x:Name="grPearsonChiSquared" HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+                    <Canvas x:Name="cPearsonDiag" Grid.Row="1" SizeChanged="cPearsonDiag_SizeChanged" />
+                </Grid>
             </TabItem>
             <TabItem Header="Корреляции">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto">
@@ -39,6 +50,8 @@
                         
                         <Canvas x:Name="cPleiadesDiagram" SizeChanged="cPleiadesDiagram_SizeChanged" Grid.Row="0" Grid.Column="1" />
                         <TextBlock x:Name="tbLegend" Grid.Row="1" Grid.Column="1" />
+                        <Grid x:Name="grMultipleCorrelationCoeffs" HorizontalAlignment="Left" VerticalAlignment="Top"
+                              Grid.Row="2" Grid.Column="1" />
                     </Grid>
                 </ScrollViewer>
                 <!--

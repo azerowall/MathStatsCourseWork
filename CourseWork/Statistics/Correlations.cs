@@ -10,11 +10,13 @@ namespace CourseWork
     {
         public double[,] CorrMatrix;
         public double[,] PartialCorrMatrix;
+        public double[] MultipleCorrletaionCoeffs;
 
         public Correlations(Table tbl, DescriptiveStatistics[] dstats)
         {
             CalcCorrMatrix(tbl, dstats);
             CalcPartialCorrMatrix(tbl);
+            CalcMultipleCorrelation(tbl);
         }
 
         private void CalcCorrMatrix(Table tbl, DescriptiveStatistics[] dstats)
@@ -26,6 +28,7 @@ namespace CourseWork
                 for (int j = 0; j < i; j++)
                 {
                     /*
+                    неправильная формула
                     double t = Enumerable.Range(0, tbl.RowsCount)
                                          .Sum(idx => (tbl[idx, i] - dstats[i].Average) * (tbl[idx, j] - dstats[j].Average));
                     t /= Math.Sqrt(dstats[i].Dispersion * dstats[i].Dispersion) * 
@@ -58,6 +61,14 @@ namespace CourseWork
 
                     PartialCorrMatrix[j, i] = PartialCorrMatrix[i, j] = num / Math.Sqrt(den1 * den2);
                 }
+        }
+
+        private void CalcMultipleCorrelation(Table tbl)
+        {
+            List<double> res = new List<double>();
+            for (int i = 0; i < tbl.ColumnsCount; i++)
+                res.Add(Math.Sqrt(1 - Matrix.Determinant(CorrMatrix) / Matrix.AlgebraicComplement(CorrMatrix, i, i)));
+            MultipleCorrletaionCoeffs = res.ToArray();
         }
     }
 }

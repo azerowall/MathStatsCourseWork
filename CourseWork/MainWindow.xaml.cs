@@ -22,7 +22,7 @@ namespace CourseWork
     {
         Table table;
         DescriptiveStatistics[] stats;
-        double[] chiSquared;
+        PearsonChiSquared[] chiSquared;
         Correlations corr;
 
         public MainWindow()
@@ -37,9 +37,9 @@ namespace CourseWork
             for (int i = 0; i < table.Columns.Length; i++)
                 stats[i] = new DescriptiveStatistics(table.Columns[i].Values);
 
-            chiSquared = new double[table.Columns.Length];
+            chiSquared = new PearsonChiSquared[table.Columns.Length];
             for (int i = 0; i < table.Columns.Length; i++)
-                chiSquared[i] = PearsonChiSquared.CalcChiSquared(table.Columns[i].Values, stats[i], 10);
+                chiSquared[i] = new PearsonChiSquared(table.Columns[i].Values, stats[i], 40);
 
 
             var sb = new StringBuilder();
@@ -58,9 +58,9 @@ namespace CourseWork
                 table.Columns.Select(c => c.Header).ToArray(),
                 new[] { "Хи-квадрат", "Нормальность" },
                 (i, j) => {
-                    if (i == 0) return chiSquared[j].ToString();
+                    if (i == 0) return Math.Round(chiSquared[j].ChiSquared, 4).ToString();
                     else
-                        return PearsonChiSquared.HasCriterion(chiSquared[j]) ? "+" : "-";
+                        return PearsonChiSquared.HasCriterion(chiSquared[j].ChiSquared) ? "+" : "-";
                 });
             string[] headers = Enumerable.Range(0, table.Columns.Length).Select(i => "X" + i).ToArray();
 
@@ -71,8 +71,18 @@ namespace CourseWork
             MakeMatrix(grCorrCompareMatrix, headers, headers,
                        (i, j) => Math.Abs(corr.CorrMatrix[i, j]) > Math.Abs(corr.PartialCorrMatrix[i, j]) ? "+" : "-");
 
+            MakeMatrix(grMultipleCorrelationCoeffs, headers, new []{ "R", "R^2" },
+                       (i, j) => {
+                           if (i == 0)
+                               return Math.Round(corr.MultipleCorrletaionCoeffs[j], 4).ToString();
+                           else
+                               return Math.Round(corr.MultipleCorrletaionCoeffs[j] * corr.MultipleCorrletaionCoeffs[j], 4).ToString();
+                       });
+
 
             tbLegend.Text = string.Join("\n", table.Columns.Select((col, i) => $"X{i} - {col.Header}"));
+
+            DrawChiSquaredDiagram(cPearsonDiag, chiSquared[0]);
         }
 
 
@@ -114,11 +124,14 @@ namespace CourseWork
             tb.TextWrapping = TextWrapping.Wrap;
             tb.Margin = new Thickness(3);
 
-            //Border border = new Border();
+            Border border = new Border();
+            border.BorderBrush = Brushes.Gray;
+            border.BorderThickness = new Thickness(1);
+            border.Child = tb;
 
-            gr.Children.Add(tb);
-            Grid.SetRow(tb, i);
-            Grid.SetColumn(tb, j);
+            gr.Children.Add(border);
+            Grid.SetRow(border, i);
+            Grid.SetColumn(border, j);
         }
 
         public void DrawDiag()
@@ -196,6 +209,46 @@ namespace CourseWork
         {
             cPleiadesDiagram.Children.Clear();
             DrawDiag();
+        }
+
+        private void DrawChiSquaredDiagram(Canvas canvas, PearsonChiSquared pcs)
+        {
+            GeometryGroup ggReal = new GeometryGroup();
+            GeometryGroup ggTheoretical = new GeometryGroup();
+
+            double stepSize = canvas.ActualWidth / pcs.IntervalsCount;
+            double canvasHeightOnePercent = canvas.ActualHeight / 100;
+            double dataOnePercent = Math.Max(pcs.MReal.Max(), pcs.MTheoretical.Max()) / 100;
+            for (int i = 0; i < pcs.IntervalsCount; i++)
+            {
+                double x = i * stepSize;
+                double height = (pcs.MReal[i] / dataOnePercent) * canvasHeightOnePercent;
+                ggReal.Children.Add(new RectangleGeometry(new Rect(x, canvas.ActualHeight - height, stepSize, height)));
+
+                height = (pcs.MTheoretical[i] / dataOnePercent) * canvasHeightOnePercent;
+                ggTheoretical.Children.Add(new RectangleGeometry(new Rect(x, canvas.ActualHeight - height, stepSize, height)));
+            }
+
+            Path pathMReal = new Path()
+            {
+                Fill = Brushes.Blue,
+                Data = ggReal,
+                Opacity = 0.5
+            };
+            Path pathMTheoretical = new Path()
+            {
+                Fill = Brushes.Green,
+                Data = ggTheoretical,
+                Opacity = 0.5
+            };
+            canvas.Children.Add(pathMReal);
+            canvas.Children.Add(pathMTheoretical);
+        }
+
+        private void cPearsonDiag_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            cPearsonDiag.Children.Clear();
+            DrawChiSquaredDiagram(cPearsonDiag, chiSquared[0]);
         }
     }
 }
