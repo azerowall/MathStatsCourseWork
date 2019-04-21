@@ -7,38 +7,39 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace CourseWork
 {
-    struct TableColumn
-    {
-        public string Header;
-        public double[] Values;
-    }
 
     class Table
     {
-        public TableColumn[] Columns;
+        public string[] Headers;
+        public double[][] ColumnsValues;
+        public string[] ShortedHeaders;
 
         public Table(string csvfile)
         {
-            using (TextFieldParser csv = new TextFieldParser(csvfile))
+            using (TextFieldParser csvParser = new TextFieldParser(csvfile))
             {
-                csv.SetDelimiters(";");
-                var headers = csv.ReadFields();
-                Columns = new TableColumn[headers.Length];
-                for (int i = 0; i < Columns.Length; i++)
-                    Columns[i].Header = headers[i];
+                csvParser.TextFieldType = FieldType.Delimited;
+                csvParser.SetDelimiters(";");
 
-                var values = TableReader(csv).ToArray();
-                for (int i = 0; i < Columns.Length; i++)
-                    Columns[i].Values = values.Select(r => r[i]).ToArray();
+                Headers = csvParser.ReadFields();
+                ColumnsValues = new double[Headers.Length][];
+
+                List<double[]> rows = new List<double[]>();
+                while (!csvParser.EndOfData)
+                    rows.Add(csvParser.ReadFields().Select(double.Parse).ToArray());
+                
+                for (int i = 0; i < ColumnsCount; i++)
+                    ColumnsValues[i] = rows.Select(r => r[i]).ToArray();
             }
+            ShortedHeaders = Enumerable.Range(0, ColumnsCount).Select(i => $"X{i}").ToArray();
         }
 
-        public int ColumnsCount => Columns.Length;
-        public int RowsCount => Columns[0].Values.Length;
-        public double this[int r, int c]
+        public int ColumnsCount => ColumnsValues.Length;
+        public int RowsCount => ColumnsValues[0].Length;
+        public double this[int i, int j]
         {
-            get { return Columns[c].Values[r]; }
-            set { Columns[c].Values[r] = value; }
+            get { return ColumnsValues[j][i]; }
+            set { ColumnsValues[j][i] = value; }
         }
 
         public IEnumerable<double[]> TableReader(TextFieldParser csv)
@@ -49,8 +50,8 @@ namespace CourseWork
 
         public void Normalize()
         {
-            foreach (var col in Columns)
-                Normalize(col.Values);
+            foreach (var col in ColumnsValues)
+                Normalize(col);
         }
 
         void Normalize(double[] vals)

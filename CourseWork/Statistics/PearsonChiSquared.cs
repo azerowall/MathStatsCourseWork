@@ -56,7 +56,8 @@ namespace CourseWork
             //int k = mReal.Length - 3;
             //double a = 0.05;
             //double critChi = 5.99146; // критическое хи-квадрат для a=0.05 и k=5-3=2
-            double critChi = 14.06714; // a=0.05 k=10-3=7
+            //double critChi = 14.06714; // a=0.05 k=10-3=7
+            double critChi = 9.48773; // k = 4
             return chi < critChi;
         }
     }

@@ -38,9 +38,9 @@ namespace CourseWork
                     double sum1 = Enumerable.Range(0, tbl.RowsCount)
                                             .Sum(idx => tbl[idx, i] * tbl[idx, j]);
                     double num = tbl.RowsCount * sum1 - dstats[i].Sum * dstats[j].Sum;
-                    double den = Math.Abs(dstats[i].Count * tbl.Columns[i].Values.Sum(d => d * d) - 
+                    double den = Math.Abs(dstats[i].Count * tbl.ColumnsValues[i].Sum(d => d * d) - 
                                           dstats[i].Sum * dstats[i].Sum) * 
-                                 Math.Abs(dstats[j].Count * tbl.Columns[j].Values.Sum(d => d * d) -
+                                 Math.Abs(dstats[j].Count * tbl.ColumnsValues[j].Sum(d => d * d) -
                                           dstats[j].Sum * dstats[j].Sum);
                     den = Math.Sqrt(den);
                     CorrMatrix[j, i] = CorrMatrix[i, j] = num / den;

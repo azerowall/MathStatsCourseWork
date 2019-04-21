@@ -23,7 +23,7 @@ namespace CourseWork
         Table table;
         DescriptiveStatistics[] stats;
         PearsonChiSquared[] chiSquared;
-        Correlations corr;
+        Correlations correlations;
 
         public MainWindow()
         {
@@ -33,54 +33,61 @@ namespace CourseWork
             table = new Table(@"iris.csv");
             table.Normalize();
 
-            stats = new DescriptiveStatistics[table.Columns.Length];
-            for (int i = 0; i < table.Columns.Length; i++)
-                stats[i] = new DescriptiveStatistics(table.Columns[i].Values);
+            stats = new DescriptiveStatistics[table.ColumnsCount];
+            for (int i = 0; i < table.ColumnsCount; i++)
+                stats[i] = new DescriptiveStatistics(table.ColumnsValues[i]);
 
-            chiSquared = new PearsonChiSquared[table.Columns.Length];
-            for (int i = 0; i < table.Columns.Length; i++)
-                chiSquared[i] = new PearsonChiSquared(table.Columns[i].Values, stats[i], 40);
+            chiSquared = new PearsonChiSquared[table.ColumnsCount];
+            for (int i = 0; i < table.ColumnsCount; i++)
+                chiSquared[i] = new PearsonChiSquared(table.ColumnsValues[i], stats[i], 7);
 
 
             var sb = new StringBuilder();
-            for (int i = 0; i < table.Columns.Length; i++)
+            for (int i = 0; i < table.ColumnsCount; i++)
             {
-                sb.AppendLine(table.Columns[i].Header);
+                sb.AppendLine(table.Headers[i]);
                 sb.AppendLine(stats[i].ToString());
             }
             tbDescriptiveStatistics.Text = sb.ToString();
 
-            corr = new Correlations(table, stats);
+            correlations = new Correlations(table, stats);
             
 
             // хи-квадраты
             MakeMatrix(grPearsonChiSquared,
-                table.Columns.Select(c => c.Header).ToArray(),
+                table.Headers,
                 new[] { "Хи-квадрат", "Нормальность" },
                 (i, j) => {
                     if (i == 0) return Math.Round(chiSquared[j].ChiSquared, 4).ToString();
                     else
                         return PearsonChiSquared.HasCriterion(chiSquared[j].ChiSquared) ? "+" : "-";
                 });
-            string[] headers = Enumerable.Range(0, table.Columns.Length).Select(i => "X" + i).ToArray();
+            string[] headers = Enumerable.Range(0, table.ColumnsCount).Select(i => "X" + i).ToArray();
 
             MakeMatrix(grCorrMatrix, headers, headers,
-                       (i, j) => Math.Round(corr.CorrMatrix[i, j],4).ToString());
+                       (i, j) => Math.Round(correlations.CorrMatrix[i, j], 4).ToString());
             MakeMatrix(grPartialCorrMatrix, headers, headers,
-                       (i, j) => Math.Round(corr.PartialCorrMatrix[i, j], 4).ToString());
+                       (i, j) => Math.Round(correlations.PartialCorrMatrix[i, j], 4).ToString());
+            //MakeMatrix(grCorrCompareMatrix, headers, headers,
+            //           (i, j) => Math.Abs(corr.CorrMatrix[i, j]) > Math.Abs(corr.PartialCorrMatrix[i, j]) ? "усиление" : "ослабление");
             MakeMatrix(grCorrCompareMatrix, headers, headers,
-                       (i, j) => Math.Abs(corr.CorrMatrix[i, j]) > Math.Abs(corr.PartialCorrMatrix[i, j]) ? "+" : "-");
+                       (i, j) => {
+                           if (i == j) return "-";
+                           else
+                               return Math.Abs(correlations.CorrMatrix[i, j]) > Math.Abs(correlations.PartialCorrMatrix[i, j]) ? "усиление" : "ослабление";
+                       });
 
             MakeMatrix(grMultipleCorrelationCoeffs, headers, new []{ "R", "R^2" },
                        (i, j) => {
                            if (i == 0)
-                               return Math.Round(corr.MultipleCorrletaionCoeffs[j], 4).ToString();
+                               return Math.Round(correlations.MultipleCorrletaionCoeffs[j], 4).ToString();
                            else
-                               return Math.Round(corr.MultipleCorrletaionCoeffs[j] * corr.MultipleCorrletaionCoeffs[j], 4).ToString();
+                               return Math.Round(correlations.MultipleCorrletaionCoeffs[j] * correlations.MultipleCorrletaionCoeffs[j], 4).ToString();
                        });
 
-
-            tbLegend.Text = string.Join("\n", table.Columns.Select((col, i) => $"X{i} - {col.Header}"));
+            
+            tbLegend.Text = string.Join("\n", table.ShortedHeaders.Zip(table.Headers, (sh, h) => $"{sh} - {h}"));
+            //tbLegend.Text = string.Join("\n", table.Columns.Select((col, i) => $"X{i} - {col.Header}"));
 
             DrawChiSquaredDiagram(cPearsonDiag, chiSquared[0]);
         }
@@ -165,9 +172,9 @@ namespace CourseWork
             {
                 for (int j = 0; j < i; j++)
                 {
-                    if (Math.Abs(corr.CorrMatrix[i, j]) >= 0.7)
+                    if (Math.Abs(correlations.CorrMatrix[i, j]) >= 0.7)
                         ggLinesCollinear.Children.Add(new LineGeometry(points[i], points[j]));
-                    else if (Math.Abs(corr.CorrMatrix[i, j]) >= 0.6)
+                    else if (Math.Abs(correlations.CorrMatrix[i, j]) >= 0.6)
                         ggLinesStrong.Children.Add(new LineGeometry(points[i], points[j]));
                 }
             }
