@@ -12,6 +12,8 @@ namespace CourseWork
         public double[,] PartialCorrMatrix;
         public double[] MultipleCorrletaionCoeffs;
 
+        public int ParametersCount => CorrMatrix.GetLength(0);
+
         public Correlations(Table tbl, DescriptiveStatistics[] dstats)
         {
             CalcCorrMatrix(tbl, dstats);

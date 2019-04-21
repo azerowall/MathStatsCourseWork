@@ -89,7 +89,7 @@ namespace CourseWork
             tbLegend.Text = string.Join("\n", table.ShortedHeaders.Zip(table.Headers, (sh, h) => $"{sh} - {h}"));
             //tbLegend.Text = string.Join("\n", table.Columns.Select((col, i) => $"X{i} - {col.Header}"));
 
-            DrawChiSquaredDiagram(cPearsonDiag, chiSquared[0]);
+            //DrawChiSquaredDiagram(cPearsonDiag, chiSquared[0]);
         }
 
 
@@ -141,121 +141,14 @@ namespace CourseWork
             Grid.SetColumn(border, j);
         }
 
-        public void DrawDiag()
-        {
-            double size = Math.Min(cPleiadesDiagram.ActualWidth, cPleiadesDiagram.ActualHeight);
-
-            const double margin = 30.0;
-            double centX, centY;
-            centX = centY = size / 2;
-            double radius = size / 2 - margin;
-
-            // круг
-            GeometryGroup ggCircle = new GeometryGroup();
-            ggCircle.Children.Add(new EllipseGeometry(new Point(centX, centY), radius, radius));
-
-            // точки
-            List<Point> points = new List<Point>();
-            double angle = 2 * Math.PI / table.ColumnsCount;
-            for (int i = 0; i < table.ColumnsCount; i++)
-            {
-                var point = new Point(radius * Math.Cos(angle * i) + centX,
-                                      radius * Math.Sin(angle * i) + centY);
-                points.Add(point);
-                ggCircle.Children.Add(new EllipseGeometry(point, 2, 2));
-            }
-
-            // линии
-            GeometryGroup ggLinesStrong = new GeometryGroup();
-            GeometryGroup ggLinesCollinear = new GeometryGroup();
-            for (int i = 1; i < table.ColumnsCount; i++)
-            {
-                for (int j = 0; j < i; j++)
-                {
-                    if (Math.Abs(correlations.CorrMatrix[i, j]) >= 0.7)
-                        ggLinesCollinear.Children.Add(new LineGeometry(points[i], points[j]));
-                    else if (Math.Abs(correlations.CorrMatrix[i, j]) >= 0.6)
-                        ggLinesStrong.Children.Add(new LineGeometry(points[i], points[j]));
-                }
-            }
-
-            // метки
-            for (int i = 0; i < table.ColumnsCount; i++)
-            {
-                double x = (radius + margin / 2) * Math.Cos(angle * i) + centX - margin * 0.3;
-                double y = (radius + margin / 2) * Math.Sin(angle * i) + centY - margin * 0.3;
-                var tbMark = new TextBlock();
-                tbMark.Text = "X" + i;
-                Canvas.SetLeft(tbMark, x);
-                Canvas.SetTop(tbMark, y);
-                cPleiadesDiagram.Children.Add(tbMark);
-            }
-
-            var pathCircle = new Path()
-            {
-                Stroke = Brushes.Black,
-                Data = ggCircle
-            };
-            var pathLinesStrong = new Path()
-            {
-                Stroke = Brushes.LightGray,
-                StrokeDashArray = new DoubleCollection(new[] { 4.0, 4.0 }),
-                Data = ggLinesStrong
-            };
-            var pathLinesCollinear = new Path()
-            {
-                Stroke = Brushes.LightGray,
-                Data = ggLinesCollinear
-            };
-            cPleiadesDiagram.Children.Add(pathCircle);
-            cPleiadesDiagram.Children.Add(pathLinesStrong);
-            cPleiadesDiagram.Children.Add(pathLinesCollinear);
-        }
-
         private void cPleiadesDiagram_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            cPleiadesDiagram.Children.Clear();
-            DrawDiag();
-        }
-
-        private void DrawChiSquaredDiagram(Canvas canvas, PearsonChiSquared pcs)
-        {
-            GeometryGroup ggReal = new GeometryGroup();
-            GeometryGroup ggTheoretical = new GeometryGroup();
-
-            double stepSize = canvas.ActualWidth / pcs.IntervalsCount;
-            double canvasHeightOnePercent = canvas.ActualHeight / 100;
-            double dataOnePercent = Math.Max(pcs.MReal.Max(), pcs.MTheoretical.Max()) / 100;
-            for (int i = 0; i < pcs.IntervalsCount; i++)
-            {
-                double x = i * stepSize;
-                double height = (pcs.MReal[i] / dataOnePercent) * canvasHeightOnePercent;
-                ggReal.Children.Add(new RectangleGeometry(new Rect(x, canvas.ActualHeight - height, stepSize, height)));
-
-                height = (pcs.MTheoretical[i] / dataOnePercent) * canvasHeightOnePercent;
-                ggTheoretical.Children.Add(new RectangleGeometry(new Rect(x, canvas.ActualHeight - height, stepSize, height)));
-            }
-
-            Path pathMReal = new Path()
-            {
-                Fill = Brushes.Blue,
-                Data = ggReal,
-                Opacity = 0.5
-            };
-            Path pathMTheoretical = new Path()
-            {
-                Fill = Brushes.Green,
-                Data = ggTheoretical,
-                Opacity = 0.5
-            };
-            canvas.Children.Add(pathMReal);
-            canvas.Children.Add(pathMTheoretical);
+            Diagrams.PleiadesDiagram.Draw(cPleiadesDiagram, correlations);
         }
 
         private void cPearsonDiag_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            cPearsonDiag.Children.Clear();
-            DrawChiSquaredDiagram(cPearsonDiag, chiSquared[0]);
+            Diagrams.PearsonDiagram.Draw(cPearsonDiag, chiSquared[0]);
         }
     }
 }
