@@ -63,15 +63,13 @@ namespace CourseWork
                         return PearsonChiSquared.HasCriterion(chiSquared[j].ChiSquared) ? "+" : "-";
                 });
             string[] headers = Enumerable.Range(0, table.ColumnsCount).Select(i => "X" + i).ToArray();
-
-            /*
-            MakeMatrix(grCorrMatrix, headers, headers,
-                       (i, j) => Math.Round(correlations.CorrMatrix[i, j], 4).ToString());
-            */
-            tblCorrMatrix.SetTable<double>(correlations.CorrMatrix, table.ShortedHeaders, table.ShortedHeaders, Highlighter);
-            tblPartialCorrMatrix.SetTable<double>(correlations.PartialCorrMatrix, table.ShortedHeaders, table.ShortedHeaders, Highlighter);
             
-                
+
+            tblCorrMatrix.SetTable<double>(correlations.CorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);
+            tblPartialCorrMatrix.SetTable<double>(correlations.PartialCorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);
+
+
+            tblSignificanceMatrix.SetTable<double>(correlations.SignificanceMatrix, table.ShortedHeaders, table.ShortedHeaders, SignificanceHighlighter);
             /*
             MakeMatrix(grCorrCompareMatrix, headers, headers,
                        (i, j) => Math.Abs(corr.CorrMatrix[i, j]) > Math.Abs(corr.PartialCorrMatrix[i, j]) ? "усиление" : "ослабление");
@@ -90,27 +88,32 @@ namespace CourseWork
                                return Math.Round(correlations.MultipleCorrletaionCoeffs[j] * correlations.MultipleCorrletaionCoeffs[j], 4).ToString();
                        });
             */
-            
-            tbLegend.Text = string.Join("\n", table.ShortedHeaders.Zip(table.Headers, (sh, h) => $"{sh} - {h}"));
-            //tbLegend.Text = string.Join("\n", table.Columns.Select((col, i) => $"X{i} - {col.Header}"));
 
-            //DrawChiSquaredDiagram(cPearsonDiag, chiSquared[0]);
+            tbLegend.Text = string.Join("\n", table.ShortedHeaders.Zip(table.Headers, (sh, h) => $"{sh} - {h}"));
         }
 
         Brush WeakCorrelationColor = new SolidColorBrush(Color.FromRgb(230, 230, 254));
         Brush MediumCorrelationColor = new SolidColorBrush(Color.FromRgb(190, 190, 254));
         Brush StrongCorrelationColor = new SolidColorBrush(Color.FromRgb(140, 140, 254));
-        private Brush Highlighter(int i, int j, double d)
+        private Brush CorrelationsHighlighter(int i, int j, double d)
         {
             d = Math.Abs(d);
-            if (d >= 0.5 && d < 0.7)
+            if (d >= 0.4 && d < 0.6)
                 return WeakCorrelationColor;
-            else if (d >= 0.7 && d < 0.9)
+            else if (d >= 0.6 && d < 0.9)
                 return MediumCorrelationColor;
             else if (d >= 0.9)
                 return StrongCorrelationColor;
             else
                 return Brushes.White;
+        }
+
+        private Brush SignificanceHighlighter(int i, int j, double d)
+        {
+            double critical = 1.9761224936033632;
+            if (d > critical)
+                return Brushes.LightGreen;
+            return Brushes.White;
         }
 
 

@@ -11,6 +11,7 @@ namespace CourseWork
         public double[,] CorrMatrix;
         public double[,] PartialCorrMatrix;
         public double[] MultipleCorrletaionCoeffs;
+        public double[,] SignificanceMatrix;
 
         public int ParametersCount => CorrMatrix.GetLength(0);
 
@@ -19,6 +20,7 @@ namespace CourseWork
             CalcCorrMatrix(tbl, dstats);
             CalcPartialCorrMatrix(tbl);
             CalcMultipleCorrelation(tbl);
+            CalcSignificanceMatrix(tbl);
         }
 
         private void CalcCorrMatrix(Table tbl, DescriptiveStatistics[] dstats)
@@ -71,6 +73,19 @@ namespace CourseWork
             for (int i = 0; i < tbl.ColumnsCount; i++)
                 res.Add(Math.Sqrt(1 - Matrix.Determinant(CorrMatrix) / Matrix.AlgebraicComplement(CorrMatrix, i, i)));
             MultipleCorrletaionCoeffs = res.ToArray();
+        }
+
+        private void CalcSignificanceMatrix(Table tbl)
+        {
+            SignificanceMatrix = new double[tbl.ColumnsCount, tbl.ColumnsCount];
+            for (int i = 1; i < tbl.ColumnsCount; i++)
+                for (int j = 0; j < i; j++)
+                {
+                    double r = CorrMatrix[i, j];
+                    double t = Math.Abs(r) * Math.Sqrt((tbl.RowsCount - 2) / (1 - r * r));
+
+                    SignificanceMatrix[i, j] = SignificanceMatrix[j, i] = t;
+                }
         }
     }
 }

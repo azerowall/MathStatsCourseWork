@@ -42,10 +42,19 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
-                        <localview:TableUC x:Name="tblCorrMatrix" />
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="Матрица коэффициентов корреляции" />
+                            <localview:TableUC x:Name="tblCorrMatrix" />
 
-                        <localview:TableUC x:Name="tblPartialCorrMatrix" Grid.Row="1" Grid.Column="0" />
-                        <localview:TableUC x:Name="tblCorrCompareMatrix" Grid.Row="2" Grid.Column="0" />
+                            <Label Content="Матрица частных коэффициентов корреляции" />
+                            <localview:TableUC x:Name="tblPartialCorrMatrix" Grid.Row="1" Grid.Column="0" />
+
+                            <Label Content="Сравнение коэффициентов корреляции с частными" />
+                            <localview:TableUC x:Name="tblCorrCompareMatrix" Grid.Row="2" Grid.Column="0" />
+
+                            <Label Content="Матрица значимости" />
+                            <localview:TableUC x:Name="tblSignificanceMatrix" Grid.Row="2" Grid.Column="0" />
+                        </StackPanel>
 
                         <Canvas x:Name="cPleiadesDiagram" SizeChanged="cPleiadesDiagram_SizeChanged" Grid.Row="0" Grid.Column="1" />
                         <TextBlock x:Name="tbLegend" Grid.Row="1" Grid.Column="1" />
