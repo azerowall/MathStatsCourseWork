@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CourseWork"
+        xmlns:localview="clr-namespace:CourseWork.View"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
@@ -41,17 +42,16 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
-                        <Grid x:Name="grCorrMatrix" HorizontalAlignment="Left" VerticalAlignment="Top"
-                          Grid.Row="0" Grid.Column="0" />
-                        <Grid x:Name="grPartialCorrMatrix" HorizontalAlignment="Left" VerticalAlignment="Top"
-                          Grid.Row="1" Grid.Column="0" />
-                        <Grid x:Name="grCorrCompareMatrix" HorizontalAlignment="Left" VerticalAlignment="Top"
-                          Grid.Row="2" Grid.Column="0" />
-                        
+                        <localview:TableUC x:Name="tblCorrMatrix" />
+
+                        <localview:TableUC x:Name="tblPartialCorrMatrix" Grid.Row="1" Grid.Column="0" />
+                        <localview:TableUC x:Name="tblCorrCompareMatrix" Grid.Row="2" Grid.Column="0" />
+
                         <Canvas x:Name="cPleiadesDiagram" SizeChanged="cPleiadesDiagram_SizeChanged" Grid.Row="0" Grid.Column="1" />
                         <TextBlock x:Name="tbLegend" Grid.Row="1" Grid.Column="1" />
-                        <Grid x:Name="grMultipleCorrelationCoeffs" HorizontalAlignment="Left" VerticalAlignment="Top"
-                              Grid.Row="2" Grid.Column="1" />
+
+
+                        <localview:TableUC x:Name="tblMultipleCorrelationCoeffs" Grid.Row="2" Grid.Column="1" />
                     </Grid>
                 </ScrollViewer>
                 <!--
