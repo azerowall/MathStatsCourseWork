@@ -39,6 +39,7 @@ namespace CourseWork.Diagrams
             }
 
             // линии
+            /*
             GeometryGroup ggLinesStrong = new GeometryGroup();
             GeometryGroup ggLinesCollinear = new GeometryGroup();
             for (int i = 1; i < correlations.ParametersCount; i++)
@@ -51,6 +52,7 @@ namespace CourseWork.Diagrams
                         ggLinesStrong.Children.Add(new LineGeometry(points[i], points[j]));
                 }
             }
+            */
 
             // метки
             for (int i = 0; i < correlations.ParametersCount; i++)
@@ -69,6 +71,7 @@ namespace CourseWork.Diagrams
                 Stroke = Brushes.Black,
                 Data = ggCircle
             };
+            /*
             var pathLinesStrong = new Path()
             {
                 Stroke = Brushes.LightGray,
@@ -80,9 +83,30 @@ namespace CourseWork.Diagrams
                 Stroke = Brushes.LightGray,
                 Data = ggLinesCollinear
             };
+            */
             canvas.Children.Add(pathCircle);
-            canvas.Children.Add(pathLinesStrong);
-            canvas.Children.Add(pathLinesCollinear);
+            canvas.Children.Add(GetLines(points, correlations.CorrMatrix, 0.4, 0.6));
+            canvas.Children.Add(GetLines(points, correlations.CorrMatrix, 0.6, 0.9));
+            canvas.Children.Add(GetLines(points, correlations.CorrMatrix, 0.9, 1.0));
+        }
+
+        private static Path GetLines(List<Point> points, double[,] mat, double a, double b)
+        {
+            GeometryGroup gg = new GeometryGroup();
+            for (int i = 1; i < mat.GetLength(0); i++)
+                for (int j = 0; j < i; j++)
+                {
+                    double d = Math.Abs(mat[i, j]);
+                    if (a <= d && d < b)
+                        gg.Children.Add(new LineGeometry(points[i], points[j]));
+                }
+            var path = new Path()
+            {
+                Data = gg,
+                Stroke = Brushes.Black,
+                Opacity = Math.Pow((b + a) / 2, 2)
+            };
+            return path;
         }
     }
 }
