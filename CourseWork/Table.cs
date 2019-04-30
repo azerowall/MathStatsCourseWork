@@ -8,7 +8,7 @@ using Microsoft.VisualBasic.FileIO;
 namespace CourseWork
 {
 
-    class Table
+    public class Table
     {
         public string[] Headers;
         public double[][] ColumnsValues;

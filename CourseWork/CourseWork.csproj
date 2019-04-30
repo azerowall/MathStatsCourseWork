@@ -60,12 +60,14 @@
     </ApplicationDefinition>
     <Compile Include="Diagrams\PearsonDiagram.cs" />
     <Compile Include="Diagrams\PleiadesDiagram.cs" />
+    <Compile Include="Statistics\Regression.cs" />
     <Compile Include="Statistics\Correlations.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="Statistics\PearsonChiSquared.cs" />
     <Compile Include="Table.cs" />
-    <Compile Include="View\TableUC.xaml.cs">
-      <DependentUpon>TableUC.xaml</DependentUpon>
+    <Compile Include="View\DataGridPearsonDiagramColumn.cs" />
+    <Compile Include="View\MatrixUC.xaml.cs">
+      <DependentUpon>MatrixUC.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -80,7 +82,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="View\TableUC.xaml">
+    <Page Include="View\MatrixUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

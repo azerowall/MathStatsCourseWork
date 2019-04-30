@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CourseWork
 {
-    class DescriptiveStatistics
+    public class DescriptiveStatistics
     {
         //public double[] Values;
 

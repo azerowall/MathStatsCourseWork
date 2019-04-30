@@ -20,10 +20,12 @@ namespace CourseWork
     /// </summary>
     public partial class MainWindow : Window
     {
-        Table table;
-        DescriptiveStatistics[] stats;
-        PearsonChiSquared[] chiSquared;
-        Correlations correlations;
+        public Table table;
+        public DescriptiveStatistics[] stats;
+        public PearsonChiSquared[] chiSquared;
+        public Correlations correlations;
+
+        public PearsonChiSquared[] ChiSquared => chiSquared;
 
         public MainWindow()
         {
@@ -39,7 +41,7 @@ namespace CourseWork
 
             chiSquared = new PearsonChiSquared[table.ColumnsCount];
             for (int i = 0; i < table.ColumnsCount; i++)
-                chiSquared[i] = new PearsonChiSquared(table.ColumnsValues[i], stats[i], 7);
+                chiSquared[i] = new PearsonChiSquared(table.Headers[i], table.ColumnsValues[i], stats[i], 7);
 
 
             var sb = new StringBuilder();
@@ -51,43 +53,41 @@ namespace CourseWork
             tbDescriptiveStatistics.Text = sb.ToString();
 
             correlations = new Correlations(table, stats);
-            
 
-            // хи-квадраты
-            MakeMatrix(grPearsonChiSquared,
-                table.Headers,
-                new[] { "Хи-квадрат", "Нормальность" },
-                (i, j) => {
-                    if (i == 0) return Math.Round(chiSquared[j].ChiSquared, 4).ToString();
-                    else
-                        return PearsonChiSquared.HasCriterion(chiSquared[j].ChiSquared) ? "+" : "-";
-                });
-            string[] headers = Enumerable.Range(0, table.ColumnsCount).Select(i => "X" + i).ToArray();
-            
 
             tblCorrMatrix.SetTable<double>(correlations.CorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);
             tblPartialCorrMatrix.SetTable<double>(correlations.PartialCorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);
 
 
             tblSignificanceMatrix.SetTable<double>(correlations.SignificanceMatrix, table.ShortedHeaders, table.ShortedHeaders, SignificanceHighlighter);
-            /*
-            MakeMatrix(grCorrCompareMatrix, headers, headers,
-                       (i, j) => Math.Abs(corr.CorrMatrix[i, j]) > Math.Abs(corr.PartialCorrMatrix[i, j]) ? "усиление" : "ослабление");
-            MakeMatrix(grCorrCompareMatrix, headers, headers,
-                       (i, j) => {
-                           if (i == j) return "-";
-                           else
-                               return Math.Abs(correlations.CorrMatrix[i, j]) > Math.Abs(correlations.PartialCorrMatrix[i, j]) ? "усиление" : "ослабление";
-                       });
 
-            MakeMatrix(grMultipleCorrelationCoeffs, headers, new []{ "R", "R^2" },
-                       (i, j) => {
-                           if (i == 0)
-                               return Math.Round(correlations.MultipleCorrletaionCoeffs[j], 4).ToString();
-                           else
-                               return Math.Round(correlations.MultipleCorrletaionCoeffs[j] * correlations.MultipleCorrletaionCoeffs[j], 4).ToString();
-                       });
-            */
+
+            var compCorr = Enumerable.Range(0, correlations.CorrMatrix.GetLength(0)).Select(i =>
+                                Enumerable.Range(0, correlations.CorrMatrix.GetLength(1)).Select(j =>
+                                {
+                                    double r = Math.Abs(correlations.CorrMatrix[i, j]);
+                                    double pr = Math.Abs(correlations.PartialCorrMatrix[i, j]);
+                                    if (r > pr)
+                                        return "усиление";
+                                    else if (r < pr)
+                                        return "ослабление";
+                                    else
+                                        return "-";
+                                }));
+            tblCorrCompareMatrix.SetTable(compCorr, table.ShortedHeaders, table.ShortedHeaders);
+
+            var multCorr = Enumerable.Range(0, correlations.CorrMatrix.GetLength(0)).Select(i =>
+                                Enumerable.Range(0, correlations.CorrMatrix.GetLength(1)).Select(j =>
+                                {
+                                    double mcc = correlations.MultipleCorrletaionCoeffs[j];
+                                    if (i == 0)
+                                        return Math.Round(mcc, 4);
+                                    else
+                                        return Math.Round(mcc * mcc, 4);
+                                }));
+            tblMultipleCorrelationCoeffs.SetTable<double>(multCorr, new[] { "R", "D" }, table.ShortedHeaders);
+
+            
 
             tbLegend.Text = string.Join("\n", table.ShortedHeaders.Zip(table.Headers, (sh, h) => $"{sh} - {h}"));
         }
@@ -116,63 +116,22 @@ namespace CourseWork
             return Brushes.White;
         }
 
-
-        public delegate string CellGetter(int i, int j);
-        public void MakeMatrix(Grid gr, string[] colHeaders, string[] rowHeaders, CellGetter getter)
+        private IEnumerable<IEnumerable<double>> EnumerateMat(double[,] mat)
         {
-            gr.Children.Clear();
-            MatrixFillHeaders(gr, colHeaders, rowHeaders);
-            for (int i = 0; i < rowHeaders.Length; i++)
-            {
-                for (int j = 0; j < colHeaders.Length; j++)
-                    SetMatrixCell(gr, i+1, j+1, getter(i, j));
-            }
+            return Enumerable.Range(0, mat.GetLength(0)).Select(i =>
+                        Enumerable.Range(0, mat.GetLength(1)).Select(j =>
+                            Math.Round(mat[i, j], 5)));
         }
-
-        public void MatrixFillHeaders(Grid gr, string[] colHeaders, string[] rowHeaders)
+        /*
+        private IEnumerable<string> EnumerateDS(DescriptiveStatistics ds)
         {
-            gr.ColumnDefinitions.Add(new ColumnDefinition());
-            gr.RowDefinitions.Add(new RowDefinition());
-
-            for (int i = 0; i < colHeaders.Length; i++)
-            {
-                gr.ColumnDefinitions.Add(new ColumnDefinition());
-                SetMatrixCell(gr, 0, i + 1, colHeaders[i]);
-            }
-            for (int i = 0; i < rowHeaders.Length; i++)
-            {
-                gr.RowDefinitions.Add(new RowDefinition());
-                SetMatrixCell(gr, i + 1, 0, rowHeaders[i]);
-            }
-        }
-
-        public void SetMatrixCell(Grid gr, int i, int j, string value)
-        {
-            TextBlock tb = new TextBlock();
-            tb.Text = value;
-            tb.VerticalAlignment = VerticalAlignment.Center;
-            tb.TextAlignment = TextAlignment.Center;
-            tb.TextWrapping = TextWrapping.Wrap;
-            tb.Margin = new Thickness(3);
-
-            Border border = new Border();
-            border.BorderBrush = Brushes.Gray;
-            border.BorderThickness = new Thickness(1);
-            border.Child = tb;
-
-            gr.Children.Add(border);
-            Grid.SetRow(border, i);
-            Grid.SetColumn(border, j);
-        }
+            yield return ds.Average;
+            yield return ds.Dispersion;
+        }*/
 
         private void cPleiadesDiagram_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Diagrams.PleiadesDiagram.Draw(cPleiadesDiagram, correlations);
-        }
-
-        private void cPearsonDiag_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            Diagrams.PearsonDiagram.Draw(cPearsonDiag, chiSquared[0]);
         }
     }
 }

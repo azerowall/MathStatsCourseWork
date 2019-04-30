@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CourseWork
 {
-    class Correlations
+    public class Correlations
     {
         public double[,] CorrMatrix;
         public double[,] PartialCorrMatrix;

@@ -18,13 +18,18 @@ namespace CourseWork.View
     /// <summary>
     /// Логика взаимодействия для TableUC.xaml
     /// </summary>
-    public partial class TableUC : UserControl
+    public partial class MatrixUC : UserControl
     {
-        //public string[] RowHeaders;
-        //public string[] ColumnHeaders;
-        //public Func<int, int, T, Brush> Highlighter;
+        /*
+        public string[] RowsHeaders;
+        public string[] ColumnsHeaders;
+        public Func<object, int, int, UIElement> CellCreator;
+        public object Data;
+        public int RowsCount;
+        public int ColumnsCount;
+        */
 
-        public TableUC()
+        public MatrixUC()
         {
             InitializeComponent();
         }
@@ -34,11 +39,30 @@ namespace CourseWork.View
             CreateGridAndHeaders(rowHeaders, colHeaders);
             for (int i = 0; i < matrix.GetLength(0); i++)
                 for (int j = 0; j < matrix.GetLength(1); j++)
-                    SetCell(matrix[i, j], i + 1, j + 1, highlighter != null ? highlighter(i, j, matrix[i, j]) : Brushes.White);
+                    SetCell(matrix[i, j], i + 1, j + 1,
+                            highlighter != null ? highlighter(i, j, matrix[i, j]) : Brushes.White);
+        }
+        public void SetTable<T>(IEnumerable<IEnumerable<T>> matrix, string[] rowHeaders, string[] colHeaders, Func<int, int, T, Brush> highlighter = null)
+        {
+            int i = 0, j = 0;
+            CreateGridAndHeaders(rowHeaders, colHeaders);
+            foreach (var row in matrix)
+            {
+                j = 0;
+                foreach (var item in row)
+                {
+                    SetCell(item, i + 1, j + 1,
+                            highlighter != null ? highlighter(i, j, item) : Brushes.White);
+                    j += 1;
+                }
+                i += 1;
+            }
         }
 
         private void CreateGridAndHeaders(string[] rowHeaders, string[] colHeaders)
         {
+            grTable.RowDefinitions.Add(new RowDefinition());
+            grTable.ColumnDefinitions.Add(new ColumnDefinition());
             for (int i = 0; i < rowHeaders.Length; i++)
             {
                 grTable.RowDefinitions.Add(new RowDefinition());

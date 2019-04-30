@@ -4,9 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CourseWork"
-        xmlns:localview="clr-namespace:CourseWork.View"
+        xmlns:view="clr-namespace:CourseWork.View"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Статистика" Height="350" Width="525">
     <Grid>
         <TabControl>
             <TabItem Header="Описательная статистика">
@@ -16,17 +16,20 @@
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Критерий Пирсона" x:Name="tiPearsonChiSquared">
-                <Grid ShowGridLines="True">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Grid x:Name="grPearsonChiSquared" HorizontalAlignment="Left" VerticalAlignment="Top" />
-
-                    <Canvas x:Name="cPearsonDiag" Grid.Row="1" SizeChanged="cPearsonDiag_SizeChanged" />
+                <Grid>
+                    <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding ChiSquared}" IsReadOnly="True" >
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="IsHitTestVisible" Value="False" />
+                            </Style>
+                        </DataGrid.RowStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Хи-квадрат" Binding="{Binding ChiSquared, Mode=OneWay, StringFormat={}{0:f4}}" />
+                            <DataGridCheckBoxColumn Header="Нормальность" Binding="{Binding HasCriterion, Mode=OneWay}" />
+                            <view:DataGridPearsonDiagramColumn Header="Диаграмма распределения" Binding="{Binding ., Mode=OneWay}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
             <TabItem Header="Корреляции">
@@ -39,28 +42,28 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
-                            <ColumnDefinition />
+                            <ColumnDefinition MinWidth="200" />
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Orientation="Vertical">
                             <Label Content="Матрица коэффициентов корреляции" />
-                            <localview:TableUC x:Name="tblCorrMatrix" />
+                            <view:MatrixUC x:Name="tblCorrMatrix" />
 
                             <Label Content="Матрица частных коэффициентов корреляции" />
-                            <localview:TableUC x:Name="tblPartialCorrMatrix" Grid.Row="1" Grid.Column="0" />
+                            <view:MatrixUC x:Name="tblPartialCorrMatrix" Grid.Row="1" Grid.Column="0" />
 
                             <Label Content="Сравнение коэффициентов корреляции с частными" />
-                            <localview:TableUC x:Name="tblCorrCompareMatrix" Grid.Row="2" Grid.Column="0" />
+                            <view:MatrixUC x:Name="tblCorrCompareMatrix" Grid.Row="2" Grid.Column="0" />
 
                             <Label Content="Матрица значимости" />
-                            <localview:TableUC x:Name="tblSignificanceMatrix" Grid.Row="2" Grid.Column="0" />
+                            <view:MatrixUC x:Name="tblSignificanceMatrix" Grid.Row="2" Grid.Column="0" />
+
+                            <Label Content="Множественные коэффициенты корреляции" />
+                            <view:MatrixUC x:Name="tblMultipleCorrelationCoeffs" Grid.Row="2" Grid.Column="0" />
                         </StackPanel>
 
                         <Canvas x:Name="cPleiadesDiagram" SizeChanged="cPleiadesDiagram_SizeChanged" Grid.Row="0" Grid.Column="1" />
                         <TextBlock x:Name="tbLegend" Grid.Row="1" Grid.Column="1" />
-
-
-                        <localview:TableUC x:Name="tblMultipleCorrelationCoeffs" Grid.Row="2" Grid.Column="1" />
                     </Grid>
                 </ScrollViewer>
                 <!--
