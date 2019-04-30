@@ -87,5 +87,11 @@ namespace CourseWork
                     SignificanceMatrix[i, j] = SignificanceMatrix[j, i] = t;
                 }
         }
+
+        public static bool IsSignificance(double r)
+        {
+            double critical = 1.9761224936033632;
+            return r > critical;
+        }
     }
 }

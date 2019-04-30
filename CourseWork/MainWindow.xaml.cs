@@ -110,8 +110,7 @@ namespace CourseWork
 
         private Brush SignificanceHighlighter(int i, int j, double d)
         {
-            double critical = 1.9761224936033632;
-            if (d > critical)
+            if (Correlations.IsSignificance(d))
                 return Brushes.LightGreen;
             return Brushes.White;
         }
