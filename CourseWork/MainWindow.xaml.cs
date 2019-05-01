@@ -24,6 +24,7 @@ namespace CourseWork
         public DescriptiveStatistics[] stats;
         public PearsonChiSquared[] chiSquared;
         public Correlations correlations;
+        public Regression regression;
 
         public PearsonChiSquared[] ChiSquared => chiSquared;
 
@@ -53,6 +54,7 @@ namespace CourseWork
             tbDescriptiveStatistics.Text = sb.ToString();
 
             correlations = new Correlations(table, stats);
+            regression = new Regression(table, 4);
 
 
             tblCorrMatrix.SetTable<double>(correlations.CorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);

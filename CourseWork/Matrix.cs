@@ -8,6 +8,50 @@ namespace CourseWork
 {
     static class Matrix
     {
+
+        #region Решение СЛАУ, обратная матрица, детерминант
+
+        enum GaussMethod
+        {
+            SwapIfZero,
+            LeadingInRow,
+            LeadingInColumn,
+            LeadingInMatrix
+        }
+
+        /// <summary>
+        /// Решение СЛАУ методом Гаусса-Жордана
+        /// </summary>
+        /// <param name="mat"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static double[] SolveSLE(double[,] mat, double[] b)
+        {
+            mat = (double[,])mat.Clone();
+            b = (double[])b.Clone();
+            int n = mat.GetLength(0);
+            
+            for (int i = 0; i < n; i++)
+            {
+                SwapRowsIfZero(mat, i);
+
+                double t = mat[i, i];
+                for (int icol = 0; icol < n; icol++)
+                    mat[i, icol] /= t;
+                b[i] /= t;
+
+                for (int irow = 0; irow < n; irow++)
+                {
+                    if (irow == i) continue;
+                    t = -mat[irow, i];
+                    for (int icol = i; icol < n; icol++)
+                        mat[irow, icol] += t * mat[i, icol];
+                    b[irow] += t * b[i];
+                }
+            }
+            return b;
+        }
+
         public static double Determinant(double[,] mat)
         {
             mat = (double[,])mat.Clone();
@@ -37,9 +81,7 @@ namespace CourseWork
                 while (idx < mat.GetLength(0) && mat[idx, i] == 0)
                     idx++;
                 if (idx != mat.GetLength(0) - 1)
-                {
                     SwapRows(mat, i, idx);
-                }
             }
         }
 
@@ -52,6 +94,28 @@ namespace CourseWork
                 mat[j, col] = t;
             }
         }
+
+        public static double[,] GetInverse(double[,] mat)
+        {
+            int n = mat.GetLength(0);
+            double[] b = new double[n];
+            double[,] result = new double[n, n];
+
+            for (int i = 0; i < n; i++)
+            {
+                b[i] = 1;
+                double[] tvect = SolveSLE(mat, b);
+                for (int j = 0; j < n; j++)
+                    result[j, i] = tvect[j];
+                b[i] = 0;
+            }
+            return result;
+        }
+
+        #endregion
+
+
+        #region Минор и алгебраическое дополнение
 
         public static double Minor(double[,] mat, int row, int col)
         {
@@ -70,5 +134,48 @@ namespace CourseWork
             double m = Minor(mat, row, col);
             return (row + col) % 2 == 0 ? m : -m;
         }
+
+        #endregion
+
+        #region Стандартные операции
+
+        public static double[,] GetTranspose(double[,] mat)
+        {
+            double[,] tmat = new double[mat.GetLength(1), mat.GetLength(0)];
+            for (int i = 0; i < mat.GetLength(0); i++)
+                for (int j = 0; j < mat.GetLength(1); j++)
+                    tmat[j, i] = mat[i, j];
+            return tmat;
+        }
+
+        public static double[,] Mul(double[,] mat1, double[,] mat2)
+        {
+            if (mat1.GetLength(1) != mat2.GetLength(0))
+                throw new ArgumentException();
+            double[,] res = new double[mat1.GetLength(0), mat2.GetLength(1)];
+            for (int i = 0; i < mat1.GetLength(0); i++)
+                for (int j = 0; j < mat2.GetLength(1); j++)
+                {
+                    res[i, j] = 0;
+                    for (int k = 0; k < mat1.GetLength(1); k++)
+                        res[i, j] += mat1[i, k] * mat2[k, j];
+                }
+            return res;
+        }
+        public static double[] MulVect(double[,] mat, double[] vect)
+        {
+            if (mat.GetLength(1) != vect.Length)
+                throw new ArgumentException();
+            double[] result = new double[mat.GetLength(0)];
+            for (int i = 0; i < mat.GetLength(0); i++)
+            {
+                result[i] = 0;
+                for (int j = 0; j < mat.GetLength(1); j++)
+                    result[i] += mat[i, j] * vect[j];
+            }
+            return result;
+        }
+
+        #endregion
     }
 }
