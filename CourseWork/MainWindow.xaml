@@ -85,6 +85,14 @@
                 </ScrollViewer>
                 -->
             </TabItem>
+            <TabItem Header="Регрессия">
+                <Grid>
+                    <Grid.RowDefinitions>
+
+                    </Grid.RowDefinitions>
+                    <TextBox x:Name="tbRegression" />
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

@@ -92,6 +92,9 @@ namespace CourseWork
             
 
             tbLegend.Text = string.Join("\n", table.ShortedHeaders.Zip(table.Headers, (sh, h) => $"{sh} - {h}"));
+
+            tbRegression.Text = string.Join(" + ", regression.Coeffs.Zip(table.ShortedHeaders, (coeff, hdr) => $"{coeff} * {hdr}"));
+            tbRegression.Text += "\nError: " + regression.Error;
         }
 
         Brush WeakCorrelationColor = new SolidColorBrush(Color.FromRgb(230, 230, 254));

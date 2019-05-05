@@ -10,13 +10,12 @@ namespace CourseWork
     {
         public double[] Coeffs { get; private set; }
         public double Error { get; private set; }
-        public int DependentIndex { get; private set; }
+        //public int DependentIndex { get; private set; }
 
         public Regression(Table tbl, int iy)
         {
-            DependentIndex = iy;
             Coeffs = CalcRegressionCoeffs(tbl, iy);
-            Error = CalcSLMError(tbl, iy, Coeffs);
+            Error = CalcSLMError(tbl, iy);
         }
         
         /// <summary>
@@ -24,17 +23,9 @@ namespace CourseWork
         /// </summary>
         /// <param name="x">Вектор 'x'</param>
         /// <returns></returns>
-        public double CalcY(double[] x)
+        public double CalcY(IEnumerable<double> x)
         {
-            double y = Coeffs[DependentIndex];
-            for (int i = 0; i < x.Length; i++)
-            {
-                if (i >= DependentIndex)
-                    y += x[i] * Coeffs[i + 1];
-                else
-                    y += x[i] * Coeffs[i];
-            }
-            return y;
+            return Coeffs[0] + Coeffs.Skip(1).Zip(x, (c, xi) => c * xi).Sum();
         }
 
         /// <summary>
@@ -59,7 +50,14 @@ namespace CourseWork
             double[,] xTx = Matrix.Mul(xT, x);
             double[,] xTx_ = Matrix.GetInverse(xTx);
             double[,] xTx_xT = Matrix.Mul(xTx_, xT);
-            return Matrix.MulVect(xTx_xT, y);
+            double[] coeffs = Matrix.MulVect(xTx_xT, y);
+
+            // свободный член ставим в начало
+            // а остальные смещаем дальше
+            double t = coeffs[iy];
+            Array.Copy(coeffs, 0, coeffs, 1, iy);
+            coeffs[0] = t;
+            return coeffs;
         }
 
         /// <summary>
@@ -69,23 +67,22 @@ namespace CourseWork
         /// <param name="iy"></param>
         /// <param name="coeffs"></param>
         /// <returns></returns>
-        private static double CalcSLMError(Table tbl, int iy, double[] coeffs)
+        private double CalcSLMError(Table tbl, int iDepended)
         {
             double error = 0;
             for (int i = 0; i < tbl.RowsCount; i++)
             {
-                double calculatedY = coeffs[iy];
-                for (int j = 0; j < tbl.ColumnsCount; j++)
-                {
-                    if (j == iy) continue;
-                    calculatedY += tbl[i, j] * coeffs[j];
-                }
-                //calculatedY = CalcY(Enumerable.Range(0, tbl.ColumnsCount)
-                //                              .Where(j => j != iy)
-                //                              .Select(j => tbl[i, j])
-                //                              .ToArray());
+                //double calculatedY = coeffs[0];
+                //for (int j = 0; j < tbl.ColumnsCount; j++)
+                //{
+                //    if (j == iy) continue;
+                //    calculatedY += tbl[i, j] * coeffs[j];
+                //}
+                double calculatedY = CalcY(Enumerable.Range(0, tbl.ColumnsCount)
+                                              .Where(j => j != iDepended)
+                                              .Select(j => tbl[i, j]));
 
-                double absError = tbl[i, iy] - calculatedY;
+                double absError = tbl[i, iDepended] - calculatedY;
                 error += absError * absError;
             }
             return error;
