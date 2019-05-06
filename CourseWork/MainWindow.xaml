@@ -47,7 +47,10 @@
 
                         <StackPanel Orientation="Vertical">
                             <Label Content="Матрица коэффициентов корреляции" />
-                            <view:MatrixUC x:Name="tblCorrMatrix" />
+                            <view:MatrixUC x:Name="tblCorrMatrix" StringFormat="{}{0:f4}"
+                                           ColumnsHeaders="{Binding ShortedHeaders}"
+                                           RowsHeaders="{Binding ShortedHeaders}"
+                                           Data="{Binding Matrix}" />
 
                             <Label Content="Матрица частных коэффициентов корреляции" />
                             <view:MatrixUC x:Name="tblPartialCorrMatrix" Grid.Row="1" Grid.Column="0" />
@@ -88,9 +91,11 @@
             <TabItem Header="Регрессия">
                 <Grid>
                     <Grid.RowDefinitions>
-
+                        <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
-                    <TextBox x:Name="tbRegression" />
+                    <view:MatrixUC x:Name="tblRegressionCoeffs" />
+                    <TextBox x:Name="tbRegressionError" Grid.Row="1" />
                 </Grid>
             </TabItem>
         </TabControl>

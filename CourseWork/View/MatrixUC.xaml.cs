@@ -28,6 +28,59 @@ namespace CourseWork.View
         public int RowsCount;
         public int ColumnsCount;
         */
+        public static readonly DependencyProperty StringFormatProperty;
+        public static readonly DependencyProperty DataProperty;
+        public static readonly DependencyProperty RowsHeadersProperty;
+        public static readonly DependencyProperty ColumnsHeadersProperty;
+        //public static readonly DependencyProperty RowsCountProperty;
+        //public static readonly DependencyProperty ColumnsCountProperty;
+
+
+        public string StringFormat
+        {
+            get { return (string)GetValue(StringFormatProperty); }
+            set { SetValue(StringFormatProperty, value); }
+        }
+        public System.Collections.IEnumerable Data
+        {
+            get { return (System.Collections.IEnumerable)GetValue(DataProperty); }
+            set { SetValue(DataProperty, value); }
+        }
+        public IEnumerable<string> RowsHeaders
+        {
+            get { return (IEnumerable<string>)GetValue(RowsHeadersProperty); }
+            set { SetValue(RowsHeadersProperty, value); }
+        }
+        public IEnumerable<string> ColumnsHeaders
+        {
+            get { return (IEnumerable<string>)GetValue(ColumnsHeadersProperty); }
+            set { SetValue(ColumnsHeadersProperty, value); }
+        }
+
+        static MatrixUC()
+        {
+            StringFormatProperty = DependencyProperty.Register(
+                "StringFormat",
+                typeof(string),
+                typeof(MatrixUC),
+                new FrameworkPropertyMetadata("{0}"));
+            DataProperty = DependencyProperty.Register(
+                "Data",
+                typeof(System.Collections.IEnumerable),
+                typeof(MatrixUC),
+                new FrameworkPropertyMetadata(OnDataChanged));
+            RowsHeadersProperty = DependencyProperty.Register("RowsHeaders", typeof(IEnumerable<string>), typeof(MatrixUC),
+                new FrameworkPropertyMetadata(OnDataChanged));
+            ColumnsHeadersProperty = DependencyProperty.Register("ColumnsHeaders", typeof(IEnumerable<string>), typeof(MatrixUC),
+                new FrameworkPropertyMetadata(OnDataChanged));
+        }
+
+        static void OnDataChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+        {
+            MatrixUC matrix = (MatrixUC)o;
+            if (matrix.RowsHeaders != null && matrix.ColumnsHeaders != null && matrix.Data != null)
+                (o as MatrixUC).FillMatrix();
+        }
 
         public MatrixUC()
         {
@@ -36,10 +89,12 @@ namespace CourseWork.View
 
         public void SetTable<T>(T[,] matrix, string[] rowHeaders, string[] colHeaders, Func<int, int, T, Brush> highlighter = null)
         {
+            string format = StringFormat;
             CreateGridAndHeaders(rowHeaders, colHeaders);
             for (int i = 0; i < matrix.GetLength(0); i++)
                 for (int j = 0; j < matrix.GetLength(1); j++)
-                    SetCell(matrix[i, j], i + 1, j + 1,
+                    SetCell(string.Format(format, matrix[i, j]),
+                            i + 1, j + 1,
                             highlighter != null ? highlighter(i, j, matrix[i, j]) : Brushes.White);
         }
         public void SetTable<T>(IEnumerable<IEnumerable<T>> matrix, string[] rowHeaders, string[] colHeaders, Func<int, int, T, Brush> highlighter = null)
@@ -51,7 +106,7 @@ namespace CourseWork.View
                 j = 0;
                 foreach (var item in row)
                 {
-                    SetCell(item, i + 1, j + 1,
+                    SetCell(item.ToString(), i + 1, j + 1,
                             highlighter != null ? highlighter(i, j, item) : Brushes.White);
                     j += 1;
                 }
@@ -59,31 +114,65 @@ namespace CourseWork.View
             }
         }
 
-        private void CreateGridAndHeaders(string[] rowHeaders, string[] colHeaders)
+        private void FillMatrix()
+        {
+            if (grTable.RowDefinitions.Count == 0 || grTable.ColumnDefinitions.Count == 0)
+                CreateGridAndHeaders(RowsHeaders, ColumnsHeaders);
+
+            var data = Data;
+            string format = StringFormat;
+            if (data is Array && (data as Array).Rank == 2)
+            {
+                Array arr = (Array)data;
+                for (int i = 0; i < arr.GetLength(0); i++)
+                    for (int j = 0; j < arr.GetLength(1); j++)
+                        SetCell(string.Format(format, arr.GetValue(i, j)), i + 1, j + 1);
+            }
+            else
+            {
+                int i = 0;
+                foreach (var row in data)
+                {
+                    int j = 0;
+                    foreach (var item in (row as System.Collections.IEnumerable))
+                    {
+                        SetCell(string.Format(format, item), i, j);
+                        j += 1;
+                    }
+                    i += 1;
+                }
+            }
+        }
+
+        private void CreateGridAndHeaders(IEnumerable<string> rowHeaders, IEnumerable<string> colHeaders)
         {
             grTable.RowDefinitions.Add(new RowDefinition());
             grTable.ColumnDefinitions.Add(new ColumnDefinition());
-            for (int i = 0; i < rowHeaders.Length; i++)
+            int i = 0;
+            foreach (var h in rowHeaders)
             {
                 grTable.RowDefinitions.Add(new RowDefinition());
-                SetCell(rowHeaders[i], i + 1, 0);
+                SetCell(h, i + 1, 0);
+                i += 1;
             }
-            for (int i = 0; i < colHeaders.Length; i++)
+            i = 0;
+            foreach (var h in colHeaders)
             {
                 grTable.ColumnDefinitions.Add(new ColumnDefinition());
-                SetCell(colHeaders[i], 0, i + 1);
+                SetCell(h, 0, i + 1);
+                i += 1;
             }
             SetCell(string.Empty, 0, 0);
         }
 
-        private void SetCell(object content, int i, int j, Brush bg = null)
+        private void SetCell(string content, int i, int j, Brush bg = null)
         {
             bg = bg != null ? bg : Brushes.White;
             TextBox tb = new TextBox()
             {
                 IsReadOnly = true,
                 Background = i == 0 || j == 0 ? Brushes.LightGray : bg,
-                Text = content.ToString(),
+                Text = content,
             };
             grTable.Children.Add(tb);
             Grid.SetRow(tb, i);

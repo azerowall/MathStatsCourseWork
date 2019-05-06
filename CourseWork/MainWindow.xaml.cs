@@ -57,7 +57,7 @@ namespace CourseWork
             regression = new Regression(table, 4);
 
 
-            tblCorrMatrix.SetTable<double>(correlations.CorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);
+            //tblCorrMatrix.SetTable<double>(correlations.CorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);
             tblPartialCorrMatrix.SetTable<double>(correlations.PartialCorrMatrix, table.ShortedHeaders, table.ShortedHeaders, CorrelationsHighlighter);
 
 
@@ -93,9 +93,15 @@ namespace CourseWork
 
             tbLegend.Text = string.Join("\n", table.ShortedHeaders.Zip(table.Headers, (sh, h) => $"{sh} - {h}"));
 
-            tbRegression.Text = string.Join(" + ", regression.Coeffs.Zip(table.ShortedHeaders, (coeff, hdr) => $"{coeff} * {hdr}"));
-            tbRegression.Text += "\nError: " + regression.Error;
+            tblRegressionCoeffs.SetTable<double>(new[] { regression.Coeffs }, new[] { "Коэффициенты" }, table.ShortedHeaders);
+            //tbRegressionError.Text = string.Join(" + ", regression.Coeffs.Zip(table.ShortedHeaders, (coeff, hdr) => $"{coeff} * {hdr}"));
+            tbRegressionError.Text += "QResidual: " + regression.QResidual;
+            tbRegressionError.Text += "\nQR: " + regression.QR;
+            tbRegressionError.Text += "\nFнабл: " + regression.F;
         }
+
+        public IEnumerable<string> ShortedHeaders => table.ShortedHeaders;
+        public double[,] Matrix => correlations.CorrMatrix;
 
         Brush WeakCorrelationColor = new SolidColorBrush(Color.FromRgb(230, 230, 254));
         Brush MediumCorrelationColor = new SolidColorBrush(Color.FromRgb(190, 190, 254));
