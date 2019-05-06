@@ -90,6 +90,7 @@ namespace CourseWork
 
         public static bool IsSignificance(double r)
         {
+            // по стьюденту
             double critical = 1.9761224936033632;
             return r > critical;
         }

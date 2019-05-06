@@ -9,15 +9,42 @@ namespace CourseWork
     public class Regression
     {
         public double[] Coeffs { get; private set; }
-        public double Error { get; private set; }
-        //public int DependentIndex { get; private set; }
+        public double QR { get; private set; }
+        public double QResidual { get; private set; }
+        public double F { get; private set; }
 
         public Regression(Table tbl, int iy)
         {
-            Coeffs = CalcRegressionCoeffs(tbl, iy);
-            Error = CalcSLMError(tbl, iy);
+            double[,] x = TableToMatrix(tbl, iy);
+            double[] y = (double[])tbl.ColumnsValues[iy].Clone();
+            Coeffs = CalcRegressionCoeffs(x, y);
+            QResidual = CalcSLMError(x, y);
+
+            double[] xbT = Matrix.MulVect(x, Coeffs);
+            QR = xbT.Zip(xbT, (a, b) => a * b).Sum();
+
+            F = (QR / (x.GetLength(1) + 1)) / (QResidual / (x.GetLength(0) - x.GetLength(1) - 1));
+            //F = (QR / 2) / (QResidual / (x.GetLength(1) - 2));
         }
+
         
+        private static double[,] TableToMatrix(Table tbl, int iy)
+        {
+            double[,] mat = new double[tbl.RowsCount, tbl.ColumnsCount];
+            for (int i = 0; i < mat.GetLength(0); i++)
+            {
+                mat[i, 0] = 1;
+                for (int j = 1; j < mat.GetLength(1); j++)
+                {
+                    if (j <= iy)
+                        mat[i, j] = tbl[i, j - 1];
+                    else
+                        mat[i, j] = tbl[i, j];
+                }
+            }
+            return mat;
+        }
+
         /// <summary>
         /// Вычислить 'y' по вектору 'x'
         /// </summary>
@@ -33,30 +60,13 @@ namespace CourseWork
         /// </summary>
         /// <param name="tbl">Таблица с выборкой</param>
         /// <param name="iy">Индекс зависимого параметра в таблице</param>
-        public static double[] CalcRegressionCoeffs(Table tbl, int iy)
+        public static double[] CalcRegressionCoeffs(double[,] x, double[] y)
         {
-            double[,] x = new double[tbl.RowsCount, tbl.ColumnsCount];
-            
-            for (int i = 0; i < x.GetLength(0); i++)
-                for (int j = 0; j < x.GetLength(1); j++)
-                    x[i, j] = tbl[i, j];
-
-            double[] y = (double[])tbl.ColumnsValues[iy].Clone();
-            // возможно перед этим нужно поменять столбцы местами
-            for (int i = 0; i < x.GetLength(0); i++)
-                x[i, iy] = 1;
-
             double[,] xT = Matrix.GetTranspose(x);
             double[,] xTx = Matrix.Mul(xT, x);
             double[,] xTx_ = Matrix.GetInverse(xTx);
             double[,] xTx_xT = Matrix.Mul(xTx_, xT);
             double[] coeffs = Matrix.MulVect(xTx_xT, y);
-
-            // свободный член ставим в начало
-            // а остальные смещаем дальше
-            double t = coeffs[iy];
-            Array.Copy(coeffs, 0, coeffs, 1, iy);
-            coeffs[0] = t;
             return coeffs;
         }
 
@@ -67,22 +77,13 @@ namespace CourseWork
         /// <param name="iy"></param>
         /// <param name="coeffs"></param>
         /// <returns></returns>
-        private double CalcSLMError(Table tbl, int iDepended)
+        private double CalcSLMError(double[,] x, double[] y)
         {
             double error = 0;
-            for (int i = 0; i < tbl.RowsCount; i++)
+            for (int i = 0; i < x.GetLength(0); i++)
             {
-                //double calculatedY = coeffs[0];
-                //for (int j = 0; j < tbl.ColumnsCount; j++)
-                //{
-                //    if (j == iy) continue;
-                //    calculatedY += tbl[i, j] * coeffs[j];
-                //}
-                double calculatedY = CalcY(Enumerable.Range(0, tbl.ColumnsCount)
-                                              .Where(j => j != iDepended)
-                                              .Select(j => tbl[i, j]));
-
-                double absError = tbl[i, iDepended] - calculatedY;
+                double calculatedY = CalcY(Enumerable.Range(1, x.GetLength(1)).Select(j => x[i, j]));
+                double absError = y[i] - calculatedY;
                 error += absError * absError;
             }
             return error;
