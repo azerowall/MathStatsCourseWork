@@ -65,6 +65,7 @@
     <Compile Include="Statistics\Correlations.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="Statistics\PearsonChiSquared.cs" />
+    <Compile Include="Statistics\StudentTable.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="ViewModels\BaseVM.cs" />
     <Compile Include="ViewModels\MainVM.cs" />

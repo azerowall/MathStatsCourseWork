@@ -88,8 +88,7 @@
                         <view:MatrixUC Data="{Binding MultipleCorrelationCoeffs}" StringFormat="{}{0:f4}"
                                        ColumnsHeaders="{Binding ShortedHeaders}"
                                        RowsHeaders="{Binding MultipleCorrelationsHeaders, Mode=OneTime}"
-                                       Grid.Row="5" Grid.Column="0">
-                        </view:MatrixUC>
+                                       Grid.Row="5" Grid.Column="0" />
 
                         <Label Content="Легенда" Grid.Row="4" Grid.Column="1" />
                         <TextBlock Text="{Binding HeadersLegend}" Grid.Row="5" Grid.Column="1" />
@@ -124,8 +123,8 @@
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <view:MatrixUC x:Name="tblRegressionCoeffs" />
-                    <TextBox x:Name="tbRegressionError" Grid.Row="1" />
+                    <view:MatrixUC />
+                    <TextBox Grid.Row="1" />
                 </Grid>
             </TabItem>
         </TabControl>

@@ -15,12 +15,19 @@ namespace CourseWork
 
         public int ParametersCount => CorrMatrix.GetLength(0);
 
+        public double Critical;
+        public bool IsSignificance(double r)
+        {
+            return r > Critical;
+        }
+
         public Correlations(Table tbl, DescriptiveStatistics[] dstats)
         {
             CalcCorrMatrix(tbl, dstats);
             CalcPartialCorrMatrix(tbl);
             CalcMultipleCorrelation(tbl);
             CalcSignificanceMatrix(tbl);
+            Critical = StudentTable.GetValue(tbl.RowsCount - 2);
         }
 
         private void CalcCorrMatrix(Table tbl, DescriptiveStatistics[] dstats)
@@ -31,14 +38,6 @@ namespace CourseWork
             for (int i = 1; i < CorrMatrix.GetLength(0); i++)
                 for (int j = 0; j < i; j++)
                 {
-                    /*
-                    неправильная формула
-                    double t = Enumerable.Range(0, tbl.RowsCount)
-                                         .Sum(idx => (tbl[idx, i] - dstats[i].Average) * (tbl[idx, j] - dstats[j].Average));
-                    t /= Math.Sqrt(dstats[i].Dispersion * dstats[i].Dispersion) * 
-                         Math.Sqrt(dstats[j].Dispersion * dstats[j].Dispersion) * tbl.RowsCount;
-                    CorrMatrix[j, i] = CorrMatrix[i, j] = t;
-                    */
                     double sum1 = Enumerable.Range(0, tbl.RowsCount)
                                             .Sum(idx => tbl[idx, i] * tbl[idx, j]);
                     double num = tbl.RowsCount * sum1 - dstats[i].Sum * dstats[j].Sum;
@@ -86,13 +85,6 @@ namespace CourseWork
 
                     SignificanceMatrix[i, j] = SignificanceMatrix[j, i] = t;
                 }
-        }
-
-        public static bool IsSignificance(double r)
-        {
-            // по стьюденту
-            double critical = 1.9761224936033632;
-            return r > critical;
         }
     }
 }

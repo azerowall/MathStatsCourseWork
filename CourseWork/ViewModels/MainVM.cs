@@ -171,7 +171,7 @@ namespace CourseWork.ViewModels
         }
         public Func<int, int, object, Brush> CorrelationsHighlighter => _CorrelationsHighlighter;
 
-        static Brush _SignificanceHighlighter(int i, int j, object o)
+        Brush _SignificanceHighlighter(int i, int j, object o)
         {
             if (Correlations.IsSignificance((double)o))
                 return Brushes.LightGreen;
