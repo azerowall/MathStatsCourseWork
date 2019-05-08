@@ -7,6 +7,16 @@
         xmlns:view="clr-namespace:CourseWork.View"
         mc:Ignorable="d"
         Title="Статистика" Height="350" Width="525">
+    <Window.Resources>
+        <Style TargetType="{x:Type DataGridRow}">
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="LightBlue" />
+                <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent" />
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black" />
+                <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="Transparent" />
+            </Style.Resources>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -27,11 +37,6 @@
             <TabItem Header="Критерий Пирсона" x:Name="tiPearsonChiSquared">
                 <Grid>
                     <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding ChiSquared}" IsReadOnly="True" >
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="IsHitTestVisible" Value="False" />
-                            </Style>
-                        </DataGrid.RowStyle>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName, Mode=OneWay}" />
                             <DataGridTextColumn Header="Хи-квадрат" Binding="{Binding ChiSquared, Mode=OneWay, StringFormat={}{0:f4}}" />
