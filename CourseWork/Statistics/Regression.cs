@@ -18,7 +18,7 @@ namespace CourseWork
             double[,] x = TableToMatrix(tbl, iy);
             double[] y = (double[])tbl.ColumnsValues[iy].Clone();
             Coeffs = CalcRegressionCoeffs(x, y);
-            QResidual = CalcSLMError(x, y);
+            QResidual = CalcSLMError(x, y, Coeffs);
 
             double[] xbT = Matrix.MulVect(x, Coeffs);
             QR = xbT.Zip(xbT, (a, b) => a * b).Sum();
@@ -58,8 +58,8 @@ namespace CourseWork
         /// <summary>
         /// Вычисление коэффициентов регрессии
         /// </summary>
-        /// <param name="tbl">Таблица с выборкой</param>
-        /// <param name="iy">Индекс зависимого параметра в таблице</param>
+        /// <param name="x">Таблица с выборкой</param>
+        /// <param name="y">Индекс зависимого параметра в таблице</param>
         public static double[] CalcRegressionCoeffs(double[,] x, double[] y)
         {
             double[,] xT = Matrix.GetTranspose(x);
@@ -73,20 +73,14 @@ namespace CourseWork
         /// <summary>
         /// Вычислить ошибку - сумму квадратов отклонений
         /// </summary>
-        /// <param name="tbl"></param>
-        /// <param name="iy"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
         /// <param name="coeffs"></param>
         /// <returns></returns>
-        private double CalcSLMError(double[,] x, double[] y)
+        public static double CalcSLMError(double[,] x, double[] y, double[] coeffs)
         {
-            double error = 0;
-            for (int i = 0; i < x.GetLength(0); i++)
-            {
-                double calculatedY = CalcY(Enumerable.Range(1, x.GetLength(1)).Select(j => x[i, j]));
-                double absError = y[i] - calculatedY;
-                error += absError * absError;
-            }
-            return error;
+            double[] calculatedY = Matrix.MulVect(x, coeffs);
+            return calculatedY.Zip(y, (a, b) => (a - b) * (a - b)).Sum();
         }
     }
 }
