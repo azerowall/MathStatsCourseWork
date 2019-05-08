@@ -22,7 +22,10 @@ namespace CourseWork
         public double Sum { get; private set; }
         public double Excess { get; private set; }
         public double Asymmetry { get; private set; }
-        public double Count { get; private set; }
+        public int Count { get; private set; }
+        public double MarginalError { get; private set; }
+        public int RequiredSize { get; private set; }
+        public double MarginalErrorWithRequiredSize { get; private set; }
 
         public DescriptiveStatistics(string name, double[] vals)
         {
@@ -42,6 +45,11 @@ namespace CourseWork
             Mode = GetMode(vals);
             Excess = GetExcess(vals, Average, StandardDeviation);
             Asymmetry = GetAsymmetry(vals, Average, StandardDeviation);
+
+            double t = StudentTable.GetValue(Count - 1);
+            MarginalError = t * StandardError;
+            RequiredSize = (int)(t * t * Dispersion / (MarginalError * MarginalError));
+            MarginalErrorWithRequiredSize = t * StandardDeviation / Math.Sqrt(RequiredSize);
         }
         
 

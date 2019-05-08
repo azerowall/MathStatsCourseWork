@@ -63,39 +63,46 @@
                             <ColumnDefinition MinWidth="200" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Content="Матрица коэффициентов корреляции" Grid.Row="0" Grid.Column="0" />
+                        <Label Content="Матрица коэффициентов корреляции" FontWeight="Bold"
+                               Grid.Row="0" Grid.Column="0" />
                         <view:MatrixUC StringFormat="{}{0:f4}" Data="{Binding CorrelationsMatrix}"
                                        RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
                                        Highlighter="{Binding CorrelationsHighlighter, Mode=OneTime}"
                                        Grid.Row="1" Grid.Column="0" />
 
-                        <Label Content="Матрица частных коэффициентов корреляции" Grid.Row="0" Grid.Column="1" />
+                        <Label Content="Матрица частных коэффициентов корреляции" FontWeight="Bold"
+                               Grid.Row="0" Grid.Column="1" />
                         <view:MatrixUC StringFormat="{}{0:f4}" Data="{Binding PartialCorrelationsMatrix}"
                                        RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
                                        Highlighter="{Binding CorrelationsHighlighter, Mode=OneTime}"
                                        Grid.Row="1" Grid.Column="1" />
 
-                        <Label Content="Сравнение коэффициентов корреляции с частными" Grid.Row="2" Grid.Column="0" />
+                        <Label Content="Сравнение коэффициентов корреляции с частными" FontWeight="Bold"
+                               Grid.Row="2" Grid.Column="0" />
                         <view:MatrixUC Data="{Binding ComparisonCorrelationsMatrix}"
                                        RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
                                        Grid.Row="3" Grid.Column="0" />
 
-                        <Label Content="Матрица значимости" Grid.Row="2" Grid.Column="1" />
+                        <Label Content="Матрица значимости" FontWeight="Bold"
+                               Grid.Row="2" Grid.Column="1" />
                         <view:MatrixUC Data="{Binding SignificanceCorrelationsMatrix}" StringFormat="{}{0:f4}"
                                        RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
                                        Highlighter="{Binding SignificanceHighlighter, Mode=OneTime}"
                                        Grid.Row="3" Grid.Column="1" />
 
-                        <Label Content="Множественные коэффициенты корреляции" Grid.Row="4" Grid.Column="0" />
+                        <Label Content="Множественные коэффициенты корреляции" FontWeight="Bold"
+                               Grid.Row="4" Grid.Column="0" />
                         <view:MatrixUC Data="{Binding MultipleCorrelationCoeffs}" StringFormat="{}{0:f4}"
                                        ColumnsHeaders="{Binding ShortedHeaders}"
                                        RowsHeaders="{Binding MultipleCorrelationsHeaders, Mode=OneTime}"
                                        Grid.Row="5" Grid.Column="0" />
 
-                        <Label Content="Легенда" Grid.Row="4" Grid.Column="1" />
+                        <Label Content="Легенда" FontWeight="Bold"
+                               Grid.Row="4" Grid.Column="1" />
                         <TextBlock Text="{Binding HeadersLegend}" Grid.Row="5" Grid.Column="1" />
 
-                        <Label Content="Диаграмма плеяд" Grid.Row="0" Grid.Column="2" />
+                        <Label Content="Диаграмма плеяд" FontWeight="Bold"
+                               Grid.Row="0" Grid.Column="2" />
                         <Canvas x:Name="cPleiadesDiagram" SizeChanged="cPleiadesDiagram_SizeChanged"
                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" />
                     </Grid>
