@@ -58,6 +58,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\DelegateCommand.cs" />
     <Compile Include="Diagrams\PearsonDiagram.cs" />
     <Compile Include="Diagrams\PleiadesDiagram.cs" />
     <Compile Include="Statistics\Regression.cs" />
@@ -65,6 +66,8 @@
     <Compile Include="Matrix.cs" />
     <Compile Include="Statistics\PearsonChiSquared.cs" />
     <Compile Include="Table.cs" />
+    <Compile Include="ViewModels\BaseVM.cs" />
+    <Compile Include="ViewModels\MainVM.cs" />
     <Compile Include="View\DataGridPearsonDiagramColumn.cs" />
     <Compile Include="View\MatrixUC.xaml.cs">
       <DependentUpon>MatrixUC.xaml</DependentUpon>

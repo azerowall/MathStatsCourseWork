@@ -8,7 +8,19 @@
         mc:Ignorable="d"
         Title="Статистика" Height="350" Width="525">
     <Grid>
-        <TabControl>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBox Padding="2" Margin="5" IsReadOnly="True" Text="{Binding LoadedFile}" />
+        <Button Content="Загрузить" Command="{Binding LoadFileCommand, Mode=OneTime}" Grid.Column="1" Padding="2" Margin="5" />
+
+        <TabControl Grid.Row="1" Grid.ColumnSpan="2">
             <TabItem Header="Описательная статистика">
                 <ScrollViewer>
                     <TextBlock x:Name="tbDescriptiveStatistics"
@@ -36,37 +48,55 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto">
                     <Grid>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
                             <RowDefinition />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
+                            <ColumnDefinition />
                             <ColumnDefinition MinWidth="200" />
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel Orientation="Vertical">
-                            <Label Content="Матрица коэффициентов корреляции" />
-                            <view:MatrixUC x:Name="tblCorrMatrix" StringFormat="{}{0:f4}"
-                                           ColumnsHeaders="{Binding ShortedHeaders}"
-                                           RowsHeaders="{Binding ShortedHeaders}"
-                                           Data="{Binding Matrix}" />
+                        <Label Content="Матрица коэффициентов корреляции" Grid.Row="0" Grid.Column="0" />
+                        <view:MatrixUC StringFormat="{}{0:f4}" Data="{Binding CorrelationsMatrix}"
+                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       Highlighter="{Binding CorrelationsHighlighter, Mode=OneTime}"
+                                       Grid.Row="1" Grid.Column="0" />
 
-                            <Label Content="Матрица частных коэффициентов корреляции" />
-                            <view:MatrixUC x:Name="tblPartialCorrMatrix" Grid.Row="1" Grid.Column="0" />
+                        <Label Content="Матрица частных коэффициентов корреляции" Grid.Row="0" Grid.Column="1" />
+                        <view:MatrixUC StringFormat="{}{0:f4}" Data="{Binding PartialCorrelationsMatrix}"
+                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       Highlighter="{Binding CorrelationsHighlighter, Mode=OneTime}"
+                                       Grid.Row="1" Grid.Column="1" />
 
-                            <Label Content="Сравнение коэффициентов корреляции с частными" />
-                            <view:MatrixUC x:Name="tblCorrCompareMatrix" Grid.Row="2" Grid.Column="0" />
+                        <Label Content="Сравнение коэффициентов корреляции с частными" Grid.Row="2" Grid.Column="0" />
+                        <view:MatrixUC Data="{Binding ComparisonCorrelationsMatrix}"
+                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       Grid.Row="3" Grid.Column="0" />
 
-                            <Label Content="Матрица значимости" />
-                            <view:MatrixUC x:Name="tblSignificanceMatrix" Grid.Row="2" Grid.Column="0" />
+                        <Label Content="Матрица значимости" Grid.Row="2" Grid.Column="1" />
+                        <view:MatrixUC Data="{Binding SignificanceCorrelationsMatrix}" StringFormat="{}{0:f4}"
+                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       Highlighter="{Binding SignificanceHighlighter, Mode=OneTime}"
+                                       Grid.Row="3" Grid.Column="1" />
 
-                            <Label Content="Множественные коэффициенты корреляции" />
-                            <view:MatrixUC x:Name="tblMultipleCorrelationCoeffs" Grid.Row="2" Grid.Column="0" />
-                        </StackPanel>
+                        <Label Content="Множественные коэффициенты корреляции" Grid.Row="4" Grid.Column="0" />
+                        <view:MatrixUC Data="{Binding MultipleCorrelationCoeffs}" StringFormat="{}{0:f4}"
+                                       ColumnsHeaders="{Binding ShortedHeaders}"
+                                       RowsHeaders="{Binding MultipleCorrelationsHeaders, Mode=OneTime}"
+                                       Grid.Row="5" Grid.Column="0">
+                        </view:MatrixUC>
 
-                        <Canvas x:Name="cPleiadesDiagram" SizeChanged="cPleiadesDiagram_SizeChanged" Grid.Row="0" Grid.Column="1" />
-                        <TextBlock x:Name="tbLegend" Grid.Row="1" Grid.Column="1" />
+                        <Label Content="Легенда" Grid.Row="4" Grid.Column="1" />
+                        <TextBlock Text="{Binding HeadersLegend}" Grid.Row="5" Grid.Column="1" />
+
+                        <Label Content="Диаграмма плеяд" Grid.Row="0" Grid.Column="2" />
+                        <Canvas x:Name="cPleiadesDiagram" SizeChanged="cPleiadesDiagram_SizeChanged"
+                                Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" />
                     </Grid>
                 </ScrollViewer>
                 <!--
