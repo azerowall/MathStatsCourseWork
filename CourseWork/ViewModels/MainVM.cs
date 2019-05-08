@@ -84,7 +84,7 @@ namespace CourseWork.ViewModels
             ChiSquared = new PearsonChiSquared[Table.ColumnsCount];
             for (int i = 0; i < Table.ColumnsCount; i++)
             {
-                DS[i] = new DescriptiveStatistics(Table.ColumnsValues[i]);
+                DS[i] = new DescriptiveStatistics(Table.Headers[i], Table.ColumnsValues[i]);
                 ChiSquared[i] = new PearsonChiSquared(Table.Headers[i], Table.ColumnsValues[i], DS[i], 7);
             }
             Correlations = new Correlations(Table, DS);

@@ -8,25 +8,26 @@ namespace CourseWork
 {
     public class DescriptiveStatistics
     {
-        //public double[] Values;
+        public string ParameterName { get; private set; }
 
-        public double Average;
-        public double Dispersion;
-        public double StandardDeviation;
-        public double StandardError;
-        public double Max;
-        public double Min;
-        public double Median;
-        public double? Mode;
-        public double Interval;
-        public double Sum;
-        public double Excess;
-        public double Asymmetry;
-        public double Count;
+        public double Average { get; private set; }
+        public double Dispersion { get; private set; }
+        public double StandardDeviation { get; private set; }
+        public double StandardError { get; private set; }
+        public double Max { get; private set; }
+        public double Min { get; private set; }
+        public double Median { get; private set; }
+        public double? Mode { get; private set; }
+        public double Interval { get; private set; }
+        public double Sum { get; private set; }
+        public double Excess { get; private set; }
+        public double Asymmetry { get; private set; }
+        public double Count { get; private set; }
 
-        public DescriptiveStatistics(double[] vals)
+        public DescriptiveStatistics(string name, double[] vals)
         {
-            //Values = vals;
+            ParameterName = name;
+            
             Sum = vals.Sum();
             Count = vals.Length;
             Average = Sum / Count;

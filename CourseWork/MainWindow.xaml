@@ -22,10 +22,7 @@
 
         <TabControl Grid.Row="1" Grid.ColumnSpan="2">
             <TabItem Header="Описательная статистика">
-                <ScrollViewer>
-                    <TextBlock x:Name="tbDescriptiveStatistics"
-                           ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" />
-                </ScrollViewer>
+                <DataGrid ItemsSource="{Binding DS}" IsReadOnly="True" />
             </TabItem>
             <TabItem Header="Критерий Пирсона" x:Name="tiPearsonChiSquared">
                 <Grid>
