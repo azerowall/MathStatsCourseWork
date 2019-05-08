@@ -32,7 +32,7 @@ namespace CourseWork
         public static double GetValue(int k)
         {
             int i = 0;
-            while (DegreesOfFreedom[i] < k) i++;
+            while (i < DegreesOfFreedom.Length && DegreesOfFreedom[i] < k) i++;
 
             if (k == DegreesOfFreedom[i]) return Values[i];
             else if (i >= DegreesOfFreedom.Length - 1) return Values[Values.Length - 1];
