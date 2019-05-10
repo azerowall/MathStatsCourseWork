@@ -6,19 +6,6 @@ using System.Threading.Tasks;
 
 namespace CourseWork
 {
-    struct Interval
-    {
-        public double Center;
-        public double Radius;
-        public Interval(double cent, double rad)
-        {
-            Center = cent;
-            Radius = rad;
-        }
-        public override string ToString() => $"{Center} ± {Radius}";
-    }
-
-
     class Regression
     {
         public double[] Coeffs;
@@ -32,6 +19,8 @@ namespace CourseWork
         public double[] CoeffsIntervalEstimates;
 
         public bool IsSignificanceCoeff(double t) => t > TCritical;
+
+        public double ApproximationError;
 
         double[,] XMat;
         public double[] RealY;
@@ -142,8 +131,9 @@ namespace CourseWork
                     Math.Sqrt(S2 * Matrix.ScalarMul(x0, Matrix.MulVect(XTXInvMat, x0)));
             }
             // интервальная оценка параметров регрессии
-            //CoeffsIntervalEstimate = sb.Select(s => new Interval(Coeffs, Math.Abs(s * TCritical))).ToArray();
             CoeffsIntervalEstimates = Sb.Select(s => Math.Abs(s * TCritical)).ToArray();
+
+            ApproximationError = RealY.Zip(CalculatedY, (a, b) => (a - b) / a).Sum() / RealY.Length;
         }
     }
 }
