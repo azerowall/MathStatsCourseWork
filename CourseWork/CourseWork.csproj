@@ -61,7 +61,8 @@
     <Compile Include="Commands\DelegateCommand.cs" />
     <Compile Include="Diagrams\PearsonDiagram.cs" />
     <Compile Include="Diagrams\PleiadesDiagram.cs" />
-    <Compile Include="FisherTable.cs" />
+    <Compile Include="RegressionClassificator.cs" />
+    <Compile Include="Statistics\FisherTable.cs" />
     <Compile Include="Statistics\Regression.cs" />
     <Compile Include="Statistics\Correlations.cs" />
     <Compile Include="Matrix.cs" />

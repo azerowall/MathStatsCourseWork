@@ -82,8 +82,6 @@ namespace CourseWork.ViewModels
                 ChiSquared[i] = new PearsonChiSquared(Table.Headers[i], Table.ColumnsValues[i], DS[i], 7);
             }
             Correlations = new Correlations(Table, DS);
-            //Regression = new Regression(Table, 4);
-            //Regression = new Regression(Table, 4);
         }
 
         #region Корреляция
@@ -203,11 +201,15 @@ namespace CourseWork.ViewModels
                 RegressionCoeffs = Enumerable.Range(0, _regr.Coeffs.Length)
                                              .Select(i => new RegressionCoefficient(i, _regr, Table, DependentParameter))
                                              .ToArray();
+                classificator = new RegressionClassificator(_regr, Table.ColumnsValues[DependentParameter]);
                 RegressionYs = Enumerable.Range(0, _regr.RealY.Length)
-                                         .Select(i => new RegressionYInfo(i, _regr))
+                                         .Select(i => new RegressionYInfo(i, _regr, classificator))
                                          .ToArray();
+                RegressionEquationInfo = GetRegressionEquationInfo(_regr);
             }
         }
+
+        RegressionClassificator classificator;
 
         public class RegressionCoefficient
         {
@@ -245,9 +247,10 @@ namespace CourseWork.ViewModels
         {
             int idx;
             Regression regr;
-            public RegressionYInfo(int i, Regression r)
+            RegressionClassificator clstor;
+            public RegressionYInfo(int i, Regression r, RegressionClassificator c)
             {
-                idx = i; regr = r;
+                idx = i; regr = r; clstor = c;
             }
             public double Real => regr.RealY[idx];
             public double Calculated => regr.CalculatedY[idx];
@@ -261,6 +264,7 @@ namespace CourseWork.ViewModels
                     return c - interv < Real && Real < c + interv;
                 }
             }
+            public bool IsClassifcationValid => clstor.Classificate(Calculated) == Real;
         }
 
         RegressionYInfo[] _regrYs;
@@ -268,6 +272,28 @@ namespace CourseWork.ViewModels
         {
             get { return _regrYs; }
             set { _regrYs = value; OnPropertyChanged("RegressionYs"); }
+        }
+
+        static string GetRegressionEquationInfo(Regression regr)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"t-крит: {regr.TCritical:f4} (Коэфф. значим если t > t-крит)");
+            sb.AppendLine($"F: {regr.F:f4}");
+            sb.AppendLine($"F-крит: {regr.FCritical:f4}");
+            if (regr.IsSignificance)
+                sb.AppendLine("F > F-крит => Уравнение значимо");
+            else
+                sb.AppendLine("F ≤ F-крит => Уравнение незначимо");
+            sb.AppendLine($"Ошибка аппроксимации: {regr.ApproximationError:f4}");
+            sb.AppendLine($"Уравнение: {regr.EquationToString()}");
+            return sb.ToString();
+        }
+
+        string _regrEquationInfo;
+        public string RegressionEquationInfo
+        {
+            get { return _regrEquationInfo; }
+            set { _regrEquationInfo = value; OnPropertyChanged("RegressionEquationInfo"); }
         }
 
         #endregion
