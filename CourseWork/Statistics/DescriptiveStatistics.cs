@@ -48,7 +48,8 @@ namespace CourseWork
 
             double t = StudentTable.GetValue(Count - 1);
             MarginalError = t * StandardError;
-            RequiredSize = (int)(t * t * Dispersion / (MarginalError * MarginalError));
+            double neededError = 0.01;
+            RequiredSize = (int)(t * t * Dispersion / (neededError * neededError));
             MarginalErrorWithRequiredSize = t * StandardDeviation / Math.Sqrt(RequiredSize);
         }
         
