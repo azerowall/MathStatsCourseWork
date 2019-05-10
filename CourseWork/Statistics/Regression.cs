@@ -133,7 +133,23 @@ namespace CourseWork
             // интервальная оценка параметров регрессии
             CoeffsIntervalEstimates = Sb.Select(s => Math.Abs(s * TCritical)).ToArray();
 
-            ApproximationError = RealY.Zip(CalculatedY, (a, b) => (a - b) / a).Sum() / RealY.Length;
+            ApproximationError = RealY.Zip(CalculatedY, (a, b) => Math.Abs((a - b) / a)).Sum() / RealY.Length;
+        }
+
+        public string EquationToString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendFormat("{0:f4}", Coeffs[0]);
+            for (int i = 1; i < Coeffs.Length; i++)
+            {
+                sb.Append(" + ");
+                if (Coeffs[i] < 0)
+                    sb.AppendFormat("({0:f4})", Coeffs[i]);
+                else
+                    sb.AppendFormat("{0:f4}", Coeffs[i]);
+                sb.AppendFormat(" * X{0}", i - 1);
+            }
+            return sb.ToString();
         }
     }
 }
