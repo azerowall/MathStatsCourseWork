@@ -6,28 +6,57 @@ using System.Threading.Tasks;
 
 namespace CourseWork
 {
-    public class Regression
+    struct Interval
     {
-        public double[] Coeffs { get; private set; }
-        public double QR { get; private set; }
-        public double QResidual { get; private set; }
-        public double F { get; private set; }
+        public double Center;
+        public double Radius;
+        public Interval(double cent, double rad)
+        {
+            Center = cent;
+            Radius = rad;
+        }
+        public override string ToString() => $"{Center} ± {Radius}";
+    }
+
+
+    class Regression
+    {
+        public double[] Coeffs;
+        public double F;
+        public double FCritical;
+        public bool IsSignificance => F > FCritical;
+        public double[] CoeffsT;
+        public double TCritical;
+
+        public double[] IntervalEstimates;
+        public double[] CoeffsIntervalEstimates;
+
+        public bool IsSignificanceCoeff(double t) => t > TCritical;
+
+        double[,] XMat;
+        public double[] RealY;
+        public double[] CalculatedY;
+        double[,] XTXInvMat;
+        double S2;
 
         public Regression(Table tbl, int iy)
         {
-            double[,] x = TableToMatrix(tbl, iy);
-            double[] y = (double[])tbl.ColumnsValues[iy].Clone();
-            Coeffs = CalcRegressionCoeffs(x, y);
-            QResidual = CalcSLMError(x, y, Coeffs);
+            XMat = TableToMatrix(tbl, iy);
+            XTXInvMat = Matrix.GetInverse(Matrix.Mul(Matrix.GetTranspose(XMat), XMat));
 
-            double[] xbT = Matrix.MulVect(x, Coeffs);
-            QR = xbT.Zip(xbT, (a, b) => a * b).Sum();
+            RealY = (double[])tbl.ColumnsValues[iy].Clone();
+            Coeffs = CalcRegressionCoeffs(XMat, RealY);
+            CalculatedY = Matrix.MulVect(XMat, Coeffs);
 
-            F = (QR / (x.GetLength(1) + 1)) / (QResidual / (x.GetLength(0) - x.GetLength(1) - 1));
-            //F = (QR / 2) / (QResidual / (x.GetLength(1) - 2));
+            CalcEstimates();
         }
 
-        
+        /// <summary>
+        /// Конвертирует таблицу с выборкой в матрицу с единичным первым столбцом и без столбца iy
+        /// </summary>
+        /// <param name="tbl"></param>
+        /// <param name="iy"></param>
+        /// <returns></returns>
         private static double[,] TableToMatrix(Table tbl, int iy)
         {
             double[,] mat = new double[tbl.RowsCount, tbl.ColumnsCount];
@@ -71,16 +100,50 @@ namespace CourseWork
         }
 
         /// <summary>
-        /// Вычислить ошибку - сумму квадратов отклонений
+        /// Вычислить интервал предсказания для заданного
+        /// набора параметров x (без единицы для свободного члена)
         /// </summary>
         /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="coeffs"></param>
         /// <returns></returns>
-        public static double CalcSLMError(double[,] x, double[] y, double[] coeffs)
+        public double CalcPredictionInterval(double[] x)
         {
-            double[] calculatedY = Matrix.MulVect(x, coeffs);
-            return calculatedY.Zip(y, (a, b) => (a - b) * (a - b)).Sum();
+            //double Qost = CalculatedY.Zip(y, (a, b) => (a - b) * (a - b)).Sum();
+            //double s2 = Qost / (n - k - 1);
+            return TCritical *
+                    Math.Sqrt(S2 * Matrix.ScalarMul(x, Matrix.MulVect(XTXInvMat, x)) + 1);
+        }
+
+        void CalcEstimates()
+        {
+            int n = XMat.GetLength(0), k = XMat.GetLength(1) - 1;
+            
+            // коэффициенты, необходимые далее
+            double Qost = CalculatedY.Zip(RealY, (a, b) => (a - b) * (a - b)).Sum();
+            double QR = Matrix.ScalarMul(CalculatedY, CalculatedY);
+            S2 = Qost / (n - k - 1);
+
+            // точечная оценка регресии
+            F = (QR / (k + 1)) / (Qost / (n - k - 1));
+            FCritical = FisherTable.GetValue(k + 1, n - k - 1);
+
+            // точечная оценка параметров регрессии
+            double[] Sb = Enumerable.Range(0, k + 1)
+                                    .Select(j => Math.Sqrt(S2 * XTXInvMat[j, j]))
+                                    .ToArray();
+            CoeffsT = Coeffs.Zip(Sb, (a, b) => Math.Abs(a / b)).ToArray();
+            TCritical = StudentTable.GetValue(n - k - 1);
+
+            // интервальная оценка регрессии
+            IntervalEstimates = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                var x0 = Enumerable.Range(0, XMat.GetLength(1)).Select(j => XMat[i, j]).ToArray();
+                IntervalEstimates[i] = TCritical *
+                    Math.Sqrt(S2 * Matrix.ScalarMul(x0, Matrix.MulVect(XTXInvMat, x0)));
+            }
+            // интервальная оценка параметров регрессии
+            //CoeffsIntervalEstimate = sb.Select(s => new Interval(Coeffs, Math.Abs(s * TCritical))).ToArray();
+            CoeffsIntervalEstimates = Sb.Select(s => Math.Abs(s * TCritical)).ToArray();
         }
     }
 }

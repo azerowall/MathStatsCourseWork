@@ -22,15 +22,15 @@ namespace CourseWork.ViewModels
             {
                 _table = value;
                 OnPropertyChanged("Table");
-                OnPropertyChanged("Headers");
-                OnPropertyChanged("ShortedHeaders");
-                OnPropertyChanged("HeadersLegend");
+                OnPropertyChanged("Parameters");
+                OnPropertyChanged("ShortedParameters");
+                OnPropertyChanged("PerametersLegend");
             }
         }
 
-        public IEnumerable<string> Headers => Table?.Headers;
-        public IEnumerable<string> ShortedHeaders => Table?.ShortedHeaders;
-        public string HeadersLegend => Table != null ?
+        public IEnumerable<string> Parameters => Table?.Headers;
+        public IEnumerable<string> ShortedParameters => Table?.ShortedHeaders;
+        public string PerametersLegend => Table != null ?
                                     string.Join("\n", Table.ShortedHeaders.Zip(Table.Headers, (s, h) => $"{s} - {h}")) :
                                     string.Empty;
 
@@ -47,12 +47,6 @@ namespace CourseWork.ViewModels
         {
             get { return _chiSquared; }
             set { _chiSquared = value; OnPropertyChanged("ChiSquared"); }
-        }
-        Regression _regr;
-        public Regression Regression
-        {
-            get { return _regr; }
-            set { _regr = value; OnPropertyChanged("Regression"); }
         }
 
         public MainVM()
@@ -88,7 +82,8 @@ namespace CourseWork.ViewModels
                 ChiSquared[i] = new PearsonChiSquared(Table.Headers[i], Table.ColumnsValues[i], DS[i], 7);
             }
             Correlations = new Correlations(Table, DS);
-            Regression = new Regression(Table, 4);
+            //Regression = new Regression(Table, 4);
+            //Regression = new Regression(Table, 4);
         }
 
         #region Корреляция
@@ -178,6 +173,102 @@ namespace CourseWork.ViewModels
             return Brushes.White;
         }
         public Func<int, int, object, Brush> SignificanceHighlighter => _SignificanceHighlighter;
+
+        #endregion
+
+
+        #region Регрессия
+
+        int _dependentParameter;
+        public int DependentParameter
+        {
+            get { return _dependentParameter; }
+            set
+            {
+                _dependentParameter = value;
+                OnPropertyChanged("DependentParameter");
+                if (Table != null)
+                    Regression = new Regression(Table, _dependentParameter);
+            }
+        }
+
+        Regression _regr;
+        public Regression Regression
+        {
+            get { return _regr; }
+            set
+            {
+                _regr = value;
+                OnPropertyChanged("Regression");
+                RegressionCoeffs = Enumerable.Range(0, _regr.Coeffs.Length)
+                                             .Select(i => new RegressionCoefficient(i, _regr, Table, DependentParameter))
+                                             .ToArray();
+                RegressionYs = Enumerable.Range(0, _regr.RealY.Length)
+                                         .Select(i => new RegressionYInfo(i, _regr))
+                                         .ToArray();
+            }
+        }
+
+        public class RegressionCoefficient
+        {
+            int idx;
+            Regression regr;
+            Table table;
+            int idxy;
+            public RegressionCoefficient(int i, Regression r, Table t, int iy)
+            {
+                idx = i; regr = r; table = t; idxy = iy;
+            }
+            public string ParameterName
+            {
+                get
+                {
+                    if (idx == 0) return "-";
+                    if (idx - 1 < idxy) return table.Headers[idx - 1];
+                    return table.Headers[idx];
+                }
+            }
+            public double Value => regr.Coeffs[idx];
+            public double T => regr.CoeffsT[idx];
+            public bool IsSignificance => regr.IsSignificanceCoeff(T);
+            public double IntervalEstimate => regr.CoeffsIntervalEstimates[idx];
+        }
+
+        RegressionCoefficient[] _regrCoeffs;
+        public RegressionCoefficient[] RegressionCoeffs
+        {
+            get { return _regrCoeffs; }
+            set { _regrCoeffs = value; OnPropertyChanged("RegressionCoeffs"); }
+        }
+
+        public class RegressionYInfo
+        {
+            int idx;
+            Regression regr;
+            public RegressionYInfo(int i, Regression r)
+            {
+                idx = i; regr = r;
+            }
+            public double Real => regr.RealY[idx];
+            public double Calculated => regr.CalculatedY[idx];
+            public double AbsError => Real - Calculated;
+            public double IntervalEstimate => regr.IntervalEstimates[idx];
+            public bool IsInInterval
+            {
+                get
+                {
+                    double c = Calculated, interv = IntervalEstimate;
+                    return c - interv < Real && Real < c + interv;
+                }
+            }
+        }
+
+        RegressionYInfo[] _regrYs;
+        public RegressionYInfo[] RegressionYs
+        {
+            get { return _regrYs; }
+            set { _regrYs = value; OnPropertyChanged("RegressionYs"); }
+        }
 
         #endregion
     }

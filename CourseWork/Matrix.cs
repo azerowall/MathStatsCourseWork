@@ -176,6 +176,11 @@ namespace CourseWork
             return result;
         }
 
+        public static double ScalarMul(IEnumerable<double> v1, IEnumerable<double> v2)
+        {
+            return v1.Zip(v2, (a, b) => a * b).Sum();
+        }
+
         #endregion
     }
 }

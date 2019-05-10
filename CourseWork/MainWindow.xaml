@@ -66,40 +66,44 @@
                         <Label Content="Матрица коэффициентов корреляции" FontWeight="Bold"
                                Grid.Row="0" Grid.Column="0" />
                         <view:MatrixUC StringFormat="{}{0:f4}" Data="{Binding CorrelationsMatrix}"
-                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       RowsHeaders="{Binding ShortedParameters}"
+                                       ColumnsHeaders="{Binding ShortedParameters}"
                                        Highlighter="{Binding CorrelationsHighlighter, Mode=OneTime}"
                                        Grid.Row="1" Grid.Column="0" />
 
                         <Label Content="Матрица частных коэффициентов корреляции" FontWeight="Bold"
                                Grid.Row="0" Grid.Column="1" />
                         <view:MatrixUC StringFormat="{}{0:f4}" Data="{Binding PartialCorrelationsMatrix}"
-                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       RowsHeaders="{Binding ShortedParameters}"
+                                       ColumnsHeaders="{Binding ShortedParameters}"
                                        Highlighter="{Binding CorrelationsHighlighter, Mode=OneTime}"
                                        Grid.Row="1" Grid.Column="1" />
 
                         <Label Content="Сравнение коэффициентов корреляции с частными" FontWeight="Bold"
                                Grid.Row="2" Grid.Column="0" />
                         <view:MatrixUC Data="{Binding ComparisonCorrelationsMatrix}"
-                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       RowsHeaders="{Binding ShortedParameters}"
+                                       ColumnsHeaders="{Binding ShortedParameters}"
                                        Grid.Row="3" Grid.Column="0" />
 
                         <Label Content="Матрица значимости" FontWeight="Bold"
                                Grid.Row="2" Grid.Column="1" />
                         <view:MatrixUC Data="{Binding SignificanceCorrelationsMatrix}" StringFormat="{}{0:f4}"
-                                       RowsHeaders="{Binding ShortedHeaders}" ColumnsHeaders="{Binding ShortedHeaders}"
+                                       RowsHeaders="{Binding ShortedParameters}"
+                                       ColumnsHeaders="{Binding ShortedParameters}"
                                        Highlighter="{Binding SignificanceHighlighter, Mode=OneTime}"
                                        Grid.Row="3" Grid.Column="1" />
 
                         <Label Content="Множественные коэффициенты корреляции" FontWeight="Bold"
                                Grid.Row="4" Grid.Column="0" />
                         <view:MatrixUC Data="{Binding MultipleCorrelationCoeffs}" StringFormat="{}{0:f4}"
-                                       ColumnsHeaders="{Binding ShortedHeaders}"
+                                       ColumnsHeaders="{Binding ShortedParameters}"
                                        RowsHeaders="{Binding MultipleCorrelationsHeaders, Mode=OneTime}"
                                        Grid.Row="5" Grid.Column="0" />
 
                         <Label Content="Легенда" FontWeight="Bold"
                                Grid.Row="4" Grid.Column="1" />
-                        <TextBlock Text="{Binding HeadersLegend}" Grid.Row="5" Grid.Column="1" />
+                        <TextBlock Text="{Binding PerametersLegend}" Grid.Row="5" Grid.Column="1" />
 
                         <Label Content="Диаграмма плеяд" FontWeight="Bold"
                                Grid.Row="0" Grid.Column="2" />
@@ -129,11 +133,62 @@
             <TabItem Header="Регрессия">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <view:MatrixUC />
-                    <TextBox Grid.Row="1" />
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Параметр 'y': " />
+                        <ComboBox ItemsSource="{Binding Parameters}" SelectedIndex="{Binding DependentParameter}" />
+                    </StackPanel>
+                    <DataGrid ItemsSource="{Binding RegressionCoeffs}" IsReadOnly="True"
+                              AutoGenerateColumns="False" Grid.Row="1" >
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName, Mode=OneWay}" />
+                            <DataGridTextColumn Header="Коэффициент регрессии"
+                                                Binding="{Binding Value, StringFormat={}{0:f4}}" />
+                            <DataGridTextColumn Header="Интервальная оценка"
+                                                Binding="{Binding IntervalEstimate, StringFormat={}± {0:f4}}" />
+                            <DataGridTextColumn Header="Значимость"
+                                                Binding="{Binding T, StringFormat={}{0:f4}}">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSignificance}" Value="True">
+                                                <Setter Property="Background" Value="LightGreen" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Label Content="Значения Y" FontWeight="Bold" Grid.Column="1" />
+                    <DataGrid ItemsSource="{Binding RegressionYs}" IsReadOnly="True"
+                              AutoGenerateColumns="False" Grid.Row="1" Grid.Column="1">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Y" Binding="{Binding Real, StringFormat={}{0:f4}}" />
+                            <DataGridTextColumn Header="Выч Y" Binding="{Binding Calculated, StringFormat={}{0:f4}}" />
+                            <DataGridTextColumn Header="Абс. ошибка" Binding="{Binding AbsError, StringFormat={}{0:f4}}" />
+                            <DataGridTextColumn Header="Интервальная оценка"
+                                                Binding="{Binding IntervalEstimate, StringFormat={}± {0:f4}}">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsInInterval}" Value="True">
+                                                <Setter Property="Background" Value="LightGreen" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
         </TabControl>
