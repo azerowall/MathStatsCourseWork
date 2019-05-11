@@ -51,7 +51,8 @@ namespace CourseWork.ViewModels
 
         public MainVM()
         {
-            LoadFileCommand = new Commands.DelegateCommand(_LoadFile);
+            LoadFileCommand = new Commands.DelegateCommand(LoadFileUsingDialog);
+            RegressionCalculateYCommand = new Commands.DelegateCommand(CalcY);
         }
 
         string _loadedFile;
@@ -61,9 +62,11 @@ namespace CourseWork.ViewModels
             set { _loadedFile = value; OnPropertyChanged("LoadedFile"); }
         }
         public Commands.DelegateCommand LoadFileCommand { get; private set; }
-        void _LoadFile(object o)
+        void LoadFileUsingDialog(object o)
         {
             var dialog = new OpenFileDialog();
+            dialog.Filter = "csv files (*.csv)|*.csv";
+            dialog.Multiselect = false;
             if (dialog.ShowDialog() == true)
             {
                 LoadFile(dialog.FileName);
@@ -206,6 +209,7 @@ namespace CourseWork.ViewModels
                                          .Select(i => new RegressionYInfo(i, _regr, classificator))
                                          .ToArray();
                 RegressionEquationInfo = GetRegressionEquationInfo(_regr);
+                RegressionParametersCount = _regr.Coeffs.Length - 1;
             }
         }
 
@@ -295,6 +299,33 @@ namespace CourseWork.ViewModels
             get { return _regrEquationInfo; }
             set { _regrEquationInfo = value; OnPropertyChanged("RegressionEquationInfo"); }
         }
+
+        int _regrParametersCount;
+        public int RegressionParametersCount
+        {
+            get { return _regrParametersCount; }
+            set { _regrParametersCount = value; OnPropertyChanged("RegressionParametersCount"); }
+        }
+
+        public double[] InputtedX { get; set; }
+
+        public Commands.DelegateCommand RegressionCalculateYCommand { get; set; }
+        void CalcY(object o)
+        {
+            if (InputtedX == null)
+                return;
+            RegressionCalculatedY = Regression.CalcY(InputtedX);
+            RegressionPredictionInterval = Regression.CalcPredictionInterval(InputtedX);
+            ClassificationClass = classificator.Classificate(RegressionCalculatedY);
+
+            OnPropertyChanged("RegressionCalculatedY");
+            OnPropertyChanged("RegressionPredictionInterval");
+            OnPropertyChanged("ClassificationClass");
+        }
+
+        public double RegressionCalculatedY { get; set; }
+        public double RegressionPredictionInterval { get; set; }
+        public double ClassificationClass { get; set; }
 
         #endregion
     }

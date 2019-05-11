@@ -175,7 +175,15 @@
                         <TextBlock Text="{Binding RegressionEquationInfo}" />
 
                         <Label Content="Прогнозирование" FontWeight="Bold" />
-
+                        <Label Content="Введите коэффициенты:" />
+                        <StackPanel Orientation="Horizontal">
+                            <view:VectorInput VectorLength="{Binding RegressionParametersCount, Mode=OneWay}"
+                                          Vector="{Binding InputtedX, Mode=OneWayToSource}"/>
+                            <Button Content=" = " Command="{Binding RegressionCalculateYCommand}" />
+                            <TextBlock Text="{Binding RegressionCalculatedY, StringFormat={}{0:f4}}" Padding="5" />
+                            <TextBlock Text="{Binding RegressionPredictionInterval, StringFormat={} ± {0:f4}}" Padding="5" />
+                            <TextBlock Text="{Binding ClassificationClass, StringFormat={} (Класс: {0})}" Padding="5" />
+                        </StackPanel>
                     </StackPanel>
                     
 
