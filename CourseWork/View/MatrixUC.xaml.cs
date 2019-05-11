@@ -94,55 +94,6 @@ namespace CourseWork.View
 
         }
 
-        public void SetTable<T>(T[,] matrix, string[] rowHeaders, string[] colHeaders, Func<int, int, T, Brush> highlighter = null)
-        {
-            string format = StringFormat;
-            CreateGridAndHeaders(rowHeaders, colHeaders);
-            for (int i = 0; i < matrix.GetLength(0); i++)
-                for (int j = 0; j < matrix.GetLength(1); j++)
-                    CreateCell(string.Format(format, matrix[i, j]),
-                               i + 1, j + 1,
-                               highlighter != null ? highlighter(i, j, matrix[i, j]) : Brushes.White);
-        }
-        public void SetTable<T>(IEnumerable<IEnumerable<T>> matrix, string[] rowHeaders, string[] colHeaders, Func<int, int, T, Brush> highlighter = null)
-        {
-            int i = 0, j = 0;
-            CreateGridAndHeaders(rowHeaders, colHeaders);
-            foreach (var row in matrix)
-            {
-                j = 0;
-                foreach (var item in row)
-                {
-                    CreateCell(item.ToString(), i + 1, j + 1,
-                               highlighter != null ? highlighter(i, j, item) : Brushes.White);
-                    j += 1;
-                }
-                i += 1;
-            }
-        }
-
-        private void CreateGridAndHeaders(IEnumerable<string> rowHeaders, IEnumerable<string> colHeaders)
-        {
-            grTable.RowDefinitions.Add(new RowDefinition());
-            grTable.ColumnDefinitions.Add(new ColumnDefinition());
-            int i = 0;
-            foreach (var h in rowHeaders)
-            {
-                grTable.RowDefinitions.Add(new RowDefinition());
-                CreateCell(h, i + 1, 0, Brushes.LightGray);
-                i += 1;
-            }
-            i = 0;
-            foreach (var h in colHeaders)
-            {
-                grTable.ColumnDefinitions.Add(new ColumnDefinition());
-                CreateCell(h, 0, i + 1, Brushes.LightGray);
-                i += 1;
-            }
-            CreateCell(string.Empty, 0, 0, Brushes.LightGray);
-        }
-
-
         private void CreateMatrix()
         {
             ClearTable();
