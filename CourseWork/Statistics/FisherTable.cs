@@ -42,6 +42,9 @@ namespace CourseWork
             while (i < Fv1.Length && Fv1[i] < v1) i++;
             while (j < Fv2.Length && Fv2[j] < v2) j++;
 
+            if (i == Fv1.Length) i--;
+            if (j == Fv1.Length) j--;
+
             // пока что так просто
             return Values[i, j];
         }
