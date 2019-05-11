@@ -34,6 +34,7 @@ namespace CourseWork
             int i = 0;
             while (i < DegreesOfFreedom.Length && DegreesOfFreedom[i] < k) i++;
 
+            if (i == DegreesOfFreedom.Length) return Values[Values.Length - 1];
             if (k == DegreesOfFreedom[i]) return Values[i];
             else if (i >= DegreesOfFreedom.Length - 1) return Values[Values.Length - 1];
 
