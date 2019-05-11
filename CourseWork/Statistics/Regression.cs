@@ -96,10 +96,11 @@ namespace CourseWork
         /// <returns></returns>
         public double CalcPredictionInterval(double[] x)
         {
-            //double Qost = CalculatedY.Zip(y, (a, b) => (a - b) * (a - b)).Sum();
-            //double s2 = Qost / (n - k - 1);
+            double[] fullX = new double[Coeffs.Length];
+            fullX[0] = 1;
+            Array.Copy(x, 0, fullX, 1, fullX.Length - 1);
             return TCritical *
-                    Math.Sqrt(S2 * Matrix.ScalarMul(x, Matrix.MulVect(XTXInvMat, x)) + 1);
+                    Math.Sqrt(S2 * Matrix.ScalarMul(fullX, Matrix.MulVect(XTXInvMat, fullX)) + 1);
         }
 
         void CalcEstimates()
