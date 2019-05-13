@@ -18,16 +18,23 @@ namespace CourseWork.View
             {
                 MinWidth = 200,
                 MinHeight = 70,
-                RenderSize = new Size(200, 70)
+                //RenderSize = new Size(200, 70)
+                //Width = 200,
+                //Height = 70,
+                //DesiredSize = new Size(200, 70)
             };
+            canvas.SizeChanged += Canvas_SizeChanged;
+            canvas.Tag = pcs;
             Diagrams.PearsonDiagram.Draw(canvas, pcs);
-            var b = new Border()
-            {
-                BorderThickness = new Thickness(3),
-                BorderBrush = Brushes.Black
-            };
             return canvas;
         }
+
+        private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Canvas canvas = (Canvas)sender;
+            Diagrams.PearsonDiagram.Draw(canvas, (PearsonChiSquared)canvas.Tag);
+        }
+
         protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
         {
             throw new NotImplementedException();
