@@ -66,9 +66,7 @@ namespace CourseWork.View
                     allFilled = false;
             if (allFilled)
                 ReadInput();
-
         }
-
 
 
         void CreateInput()

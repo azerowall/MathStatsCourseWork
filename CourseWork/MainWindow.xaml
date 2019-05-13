@@ -32,7 +32,25 @@
 
         <TabControl Grid.Row="1" Grid.ColumnSpan="2">
             <TabItem Header="Описательная статистика">
-                <DataGrid ItemsSource="{Binding DS}" IsReadOnly="True" />
+                <DataGrid ItemsSource="{Binding DS}" IsReadOnly="True" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName}" />
+                        <DataGridTextColumn Header="Среднее" Binding="{Binding Average, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Дисперсия" Binding="{Binding Dispersion, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Стандартное отклонение" Binding="{Binding StandardDeviation, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Стандартная ошибка" Binding="{Binding StandardError, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Максимум" Binding="{Binding Max, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Минимум" Binding="{Binding Min, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Медиана" Binding="{Binding Median, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Мода" Binding="{Binding Mode, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Интервал" Binding="{Binding Interval, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Эксцесс" Binding="{Binding Excess, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Асимметрия" Binding="{Binding Asymmetry, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Предельная ошибка" Binding="{Binding MarginalError, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Требуемый объем выборки" Binding="{Binding RequiredSize, StringFormat={}{0:f4}}" />
+                        <DataGridTextColumn Header="Предельная ошибка при требуемом объеме" Binding="{Binding MarginalErrorWithRequiredSize, StringFormat={}{0:f4}}" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </TabItem>
             <TabItem Header="Критерий Пирсона" x:Name="tiPearsonChiSquared">
                 <Grid>
@@ -99,6 +117,7 @@
                         <view:MatrixUC Data="{Binding MultipleCorrelationCoeffs}" StringFormat="{}{0:f4}"
                                        ColumnsHeaders="{Binding ShortedParameters}"
                                        RowsHeaders="{Binding MultipleCorrelationsHeaders, Mode=OneTime}"
+                                       Highlighter="{Binding MultipleCorrelationsHighlighter, Mode=OneTime}"
                                        Grid.Row="5" Grid.Column="0" />
 
                         <Label Content="Легенда" FontWeight="Bold"
@@ -146,45 +165,48 @@
                         <ComboBox ItemsSource="{Binding Parameters}" SelectedIndex="{Binding DependentParameter}" />
                     </StackPanel>
 
-                    <StackPanel Orientation="Vertical" Grid.Row="1">
-                        <Label Content="Коэффициенты уравнения" FontWeight="Bold" />
-                        <DataGrid ItemsSource="{Binding RegressionCoeffs}" IsReadOnly="True"
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" Grid.Row="1">
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="Коэффициенты уравнения" FontWeight="Bold" />
+                            <DataGrid ItemsSource="{Binding RegressionCoeffs}" IsReadOnly="True"
                               AutoGenerateColumns="False" >
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName, Mode=OneWay}" />
-                                <DataGridTextColumn Header="Коэффициент регрессии"
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName, Mode=OneWay}" />
+                                    <DataGridTextColumn Header="Коэффициент регрессии"
                                                 Binding="{Binding Value, StringFormat={}{0:f4}}" />
-                                <DataGridTextColumn Header="Интервальная оценка"
+                                    <DataGridTextColumn Header="Интервальная оценка"
                                                 Binding="{Binding IntervalEstimate, StringFormat={}± {0:f4}}" />
-                                <DataGridTextColumn Header="Значимость"
+                                    <DataGridTextColumn Header="Значимость"
                                                 Binding="{Binding T, StringFormat={}{0:f4}}">
-                                    <DataGridTextColumn.CellStyle>
-                                        <Style TargetType="{x:Type DataGridCell}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSignificance}" Value="True">
-                                                    <Setter Property="Background" Value="LightGreen" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </DataGridTextColumn.CellStyle>
-                                </DataGridTextColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                                        <DataGridTextColumn.CellStyle>
+                                            <Style TargetType="{x:Type DataGridCell}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSignificance}" Value="True">
+                                                        <Setter Property="Background" Value="LightGreen" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGridTextColumn.CellStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
 
-                        <Label Content="Уравнение регрессии" FontWeight="Bold" />
-                        <TextBlock Text="{Binding RegressionEquationInfo}" />
+                            <Label Content="Уравнение регрессии" FontWeight="Bold" />
+                            <TextBlock Text="{Binding RegressionEquationInfo}" />
 
-                        <Label Content="Прогнозирование" FontWeight="Bold" />
-                        <Label Content="Введите коэффициенты:" />
-                        <StackPanel Orientation="Horizontal">
-                            <view:VectorInput VectorLength="{Binding RegressionParametersCount, Mode=OneWay}"
+                            <Label Content="Прогнозирование" FontWeight="Bold" />
+                            <Label Content="Введите коэффициенты:" />
+                            <StackPanel Orientation="Horizontal">
+                                <view:VectorInput VectorLength="{Binding RegressionParametersCount, Mode=OneWay}"
                                           Vector="{Binding InputtedX, Mode=OneWayToSource}"/>
-                            <Button Content=" = " Command="{Binding RegressionCalculateYCommand}" />
-                            <TextBlock Text="{Binding RegressionCalculatedY, StringFormat={}{0:f4}}" Padding="5" />
-                            <TextBlock Text="{Binding RegressionPredictionInterval, StringFormat={} ± {0:f4}}" Padding="5" />
-                            <TextBlock Text="{Binding ClassificationClass, StringFormat={} (Класс: {0})}" Padding="5" />
+                                <Button Content=" = " Command="{Binding RegressionCalculateYCommand}" />
+                                <TextBlock Text="{Binding RegressionCalculatedY, StringFormat={}{0:f4}}" Padding="5" />
+                                <TextBlock Text="{Binding RegressionPredictionInterval, StringFormat={} ± {0:f4}}" Padding="5" />
+                                <TextBlock Text="{Binding ClassificationClass, StringFormat={} (Класс: {0})}" Padding="5" />
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </ScrollViewer>
+                    
                     
 
                     <Label Content="Значения Y" FontWeight="Bold" Grid.Column="1" />
