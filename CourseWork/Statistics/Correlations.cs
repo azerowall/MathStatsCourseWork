@@ -10,8 +10,10 @@ namespace CourseWork
     {
         public double[,] CorrMatrix;
         public double[,] PartialCorrMatrix;
-        public double[] MultipleCorrletaionCoeffs;
         public double[,] SignificanceMatrix;
+        public double[] MultipleCorreletaionCoeffs;
+        public double[] MultipleDeterminationCoeffs;
+        public double[] MultipleCorrSignificance;
 
         public int ParametersCount => CorrMatrix.GetLength(0);
 
@@ -21,11 +23,16 @@ namespace CourseWork
             return r > Critical;
         }
 
+        public double MultiCritical;
+        public bool IsMultipleCoeffSignificance(double F) => F > MultiCritical;
+
         public Correlations(Table tbl, DescriptiveStatistics[] dstats)
         {
             CalcCorrMatrix(tbl, dstats);
             CalcPartialCorrMatrix(tbl);
             CalcMultipleCorrelation(tbl);
+            MultipleDeterminationCoeffs = MultipleCorreletaionCoeffs.Select(a => a * a).ToArray();
+            CalcMultipleSignificance(tbl);
             CalcSignificanceMatrix(tbl);
             Critical = StudentTable.GetValue(tbl.RowsCount - 2);
         }
@@ -71,7 +78,7 @@ namespace CourseWork
             List<double> res = new List<double>();
             for (int i = 0; i < tbl.ColumnsCount; i++)
                 res.Add(Math.Sqrt(1 - Matrix.Determinant(CorrMatrix) / Matrix.AlgebraicComplement(CorrMatrix, i, i)));
-            MultipleCorrletaionCoeffs = res.ToArray();
+            MultipleCorreletaionCoeffs = res.ToArray();
         }
 
         private void CalcSignificanceMatrix(Table tbl)
@@ -85,6 +92,18 @@ namespace CourseWork
 
                     SignificanceMatrix[i, j] = SignificanceMatrix[j, i] = t;
                 }
+        }
+
+        private void CalcMultipleSignificance(Table tbl)
+        {
+            int n = tbl.RowsCount, k = tbl.ColumnsCount;
+            MultipleCorrSignificance = new double[k];
+            for (int i = 0; i < MultipleCorreletaionCoeffs.Length; i++)
+            {
+                double R = MultipleCorreletaionCoeffs[i];
+                double F = (R * R * (n - k - 1)) / ((n - R * R) * k);
+                MultipleCorrSignificance[i] = F;
+            }
         }
     }
 }

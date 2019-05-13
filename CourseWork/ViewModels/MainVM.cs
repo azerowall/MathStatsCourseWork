@@ -132,8 +132,9 @@ namespace CourseWork.ViewModels
             {
                 if (Correlations == null) return null;
                 return new[] {
-                    Correlations.MultipleCorrletaionCoeffs,
-                    Correlations.MultipleCorrletaionCoeffs.Select(d => d*d)};
+                    Correlations.MultipleCorreletaionCoeffs,
+                    Correlations.MultipleDeterminationCoeffs
+                };
             }
         }
         public IEnumerable<string> MultipleCorrelationsHeaders
@@ -174,6 +175,19 @@ namespace CourseWork.ViewModels
             return Brushes.White;
         }
         public Func<int, int, object, Brush> SignificanceHighlighter => _SignificanceHighlighter;
+
+        Brush _MultipleCorrelationsHighlighter(int i, int j, object o)
+        {
+            double d = (double)o;
+            double F = Correlations.MultipleCorrSignificance[j];
+            if (i == 0 && Correlations.IsMultipleCoeffSignificance(F))
+            {
+                return Brushes.LightGreen;
+            }
+            else if (i == 1 && d >= 0.8) return Brushes.LightGreen;
+            return Brushes.White;
+        }
+        public Func<int, int, object, Brush> MultipleCorrelationsHighlighter => _MultipleCorrelationsHighlighter;
 
         #endregion
 
