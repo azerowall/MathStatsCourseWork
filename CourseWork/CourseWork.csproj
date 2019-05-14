@@ -59,6 +59,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Commands\DelegateCommand.cs" />
+    <Compile Include="CriticalChiSquaredTable.cs" />
     <Compile Include="Diagrams\PearsonDiagram.cs" />
     <Compile Include="Diagrams\PleiadesDiagram.cs" />
     <Compile Include="RegressionClassificator.cs" />

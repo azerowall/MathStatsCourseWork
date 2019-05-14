@@ -52,9 +52,22 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
+            
+            
             <TabItem Header="Критерий Пирсона" x:Name="tiPearsonChiSquared">
                 <Grid>
-                    <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding ChiSquared}" IsReadOnly="True" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <Label Content="Количество интервалов" />
+                        <TextBox Text="{Binding ChiSquaredIntervalsCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="100" Padding="5" />
+                    </StackPanel>
+                    <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding ChiSquared}"
+                              IsReadOnly="True" Grid.Row="1" >
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName, Mode=OneWay}" />
                             <DataGridTextColumn Header="Хи-квадрат" Binding="{Binding ChiSquared, Mode=OneWay, StringFormat={}{0:f4}}" />
@@ -64,6 +77,8 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
+            
+            
             <TabItem Header="Корреляционный анализ">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto">
                     <Grid>

@@ -11,6 +11,11 @@ namespace CourseWork.ViewModels
 {
     class MainVM : BaseVM
     {
+        public MainVM()
+        {
+            LoadFileCommand = new Commands.DelegateCommand(LoadFileUsingDialog);
+            RegressionCalculateYCommand = new Commands.DelegateCommand(CalcY);
+        }
 
         #region Таблица
 
@@ -34,26 +39,7 @@ namespace CourseWork.ViewModels
                                     string.Join("\n", Table.ShortedHeaders.Zip(Table.Headers, (s, h) => $"{s} - {h}")) :
                                     string.Empty;
 
-        #endregion
 
-        DescriptiveStatistics[] _ds;
-        public DescriptiveStatistics[] DS
-        {
-            get { return _ds; }
-            set { _ds = value; OnPropertyChanged("DS"); }
-        }
-        PearsonChiSquared[] _chiSquared;
-        public PearsonChiSquared[] ChiSquared
-        {
-            get { return _chiSquared; }
-            set { _chiSquared = value; OnPropertyChanged("ChiSquared"); }
-        }
-
-        public MainVM()
-        {
-            LoadFileCommand = new Commands.DelegateCommand(LoadFileUsingDialog);
-            RegressionCalculateYCommand = new Commands.DelegateCommand(CalcY);
-        }
 
         string _loadedFile;
         public string LoadedFile
@@ -77,15 +63,50 @@ namespace CourseWork.ViewModels
         {
             Table = new Table(path);
             Table.Normalize();
-            DS = new DescriptiveStatistics[Table.ColumnsCount];
-            ChiSquared = new PearsonChiSquared[Table.ColumnsCount];
+            DescriptiveStatistics[] ds = new DescriptiveStatistics[Table.ColumnsCount];
             for (int i = 0; i < Table.ColumnsCount; i++)
-            {
-                DS[i] = new DescriptiveStatistics(Table.Headers[i], Table.ColumnsValues[i]);
-                ChiSquared[i] = new PearsonChiSquared(Table.Headers[i], Table.ColumnsValues[i], DS[i], 7);
-            }
+                ds[i] = new DescriptiveStatistics(Table.Headers[i], Table.ColumnsValues[i]);
+            DS = ds;
+            ChiSquaredIntervalsCount = 5;
             Correlations = new Correlations(Table, DS);
         }
+
+        #endregion
+
+        DescriptiveStatistics[] _ds;
+        public DescriptiveStatistics[] DS
+        {
+            get { return _ds; }
+            set { _ds = value; OnPropertyChanged("DS"); }
+        }
+
+        #region Критерий Пирсона
+
+        PearsonChiSquared[] _chiSquared;
+        public PearsonChiSquared[] ChiSquared
+        {
+            get { return _chiSquared; }
+            set { _chiSquared = value; OnPropertyChanged("ChiSquared"); }
+        }
+
+        public int _intervalsCount = 5;
+        public int ChiSquaredIntervalsCount
+        {
+            get { return _intervalsCount; }
+            set
+            {
+                _intervalsCount = value;
+                OnPropertyChanged("ChiSquaredIntervalsCount");
+                PearsonChiSquared[] pcs = new PearsonChiSquared[Table.ColumnsCount];
+                for (int i = 0; i < pcs.Length; i++)
+                    pcs[i] = new PearsonChiSquared(Table.Headers[i], Table.ColumnsValues[i],
+                                                   DS[i], _intervalsCount);
+                ChiSquared = pcs;
+            }
+        }
+
+        #endregion
+
 
         #region Корреляция
 

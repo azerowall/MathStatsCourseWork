@@ -15,15 +15,17 @@ namespace CourseWork
         public double ChiSquared { get; private set; }
         public int IntervalsCount => MReal.Length;
 
-        //static double criticalChi = 5.99146;  // a=0.05 и k=5-3=2
-        //static double criticalChi = 14.06714; // a=0.05 k=10-3=7
-        static double criticalChi = 9.48773; // k = 4
-        public bool HasCriterion => ChiSquared < criticalChi;
+        //static double criticalChi = 5.99146;  // k=5-3=2
+        //static double criticalChi = 14.06714; // k=10-3=7
+        //static double criticalChi = 9.48773; // k = 7-3 = 4
+        double CriticalChi = 7.81473; // k = 6-3 = 3
+        public bool HasCriterion => ChiSquared < CriticalChi;
 
         public PearsonChiSquared(string name, double[] vals, DescriptiveStatistics ds, int intervalsCount)
         {
             ParameterName = name;
             CalcChiSquared(vals, ds, intervalsCount);
+            CriticalChi = CriticalChiSquaredTable.GetValue(intervalsCount - 3);
         }
 
         private void CalcChiSquared(double[] vals, DescriptiveStatistics ds, int stepsCount)
