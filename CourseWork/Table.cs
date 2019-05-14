@@ -13,6 +13,7 @@ namespace CourseWork
         public string[] Headers;
         public double[][] ColumnsValues;
         public string[] ShortedHeaders;
+        public double[] IntervalsBeforeNormalization;
 
         public Table(string csvfile)
         {
@@ -50,15 +51,17 @@ namespace CourseWork
 
         public void Normalize()
         {
-            foreach (var col in ColumnsValues)
-                Normalize(col);
-        }
+            IntervalsBeforeNormalization = new double[ColumnsValues.Length];
+            for (int i = 0; i < ColumnsValues.Length; i++)
+            {
+                double[] vals = ColumnsValues[i];
+                double interval = vals.Max() - vals.Min();
+                for (int j = 0; j < vals.Length; j++)
+                    vals[j] /= interval;
 
-        void Normalize(double[] vals)
-        {
-            double interval = vals.Max() - vals.Min();
-            for (int i = 0; i < vals.Length; i++)
-                vals[i] /= interval;
+                IntervalsBeforeNormalization[i] = interval;
+            }
+
         }
     }
 }

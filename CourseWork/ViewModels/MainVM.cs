@@ -262,6 +262,7 @@ namespace CourseWork.ViewModels
                 }
             }
         }
+
         public class ParameterExcl
         {
             public int Index;
@@ -398,9 +399,21 @@ namespace CourseWork.ViewModels
         {
             if (InputtedX == null)
                 return;
-            RegressionCalculatedY = Regression.CalcY(InputtedX);
-            RegressionPredictionInterval = Regression.CalcPredictionInterval(InputtedX);
+
+            // нормирование "на лету"
+            double[] intervals = Table.IntervalsBeforeNormalization;
+            double[] x = InputtedX.ToArray();
+            for (int i = 0; i < x.Length; i++)
+                x[i] /= intervals[_notExcludedParams[i]];
+
+            RegressionCalculatedY = Regression.CalcY(x);
+            RegressionPredictionInterval = Regression.CalcPredictionInterval(x);
             ClassificationClass = classificator.Classificate(RegressionCalculatedY);
+
+            // назад к нормальным значениям
+            RegressionCalculatedY *= intervals[DependentParameter];
+            RegressionPredictionInterval *= intervals[DependentParameter];
+            ClassificationClass *= intervals[DependentParameter];
 
             OnPropertyChanged("RegressionCalculatedY");
             OnPropertyChanged("RegressionPredictionInterval");
