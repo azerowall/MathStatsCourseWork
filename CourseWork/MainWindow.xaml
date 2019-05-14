@@ -52,8 +52,8 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
-            
-            
+
+
             <TabItem Header="Критерий Пирсона" x:Name="tiPearsonChiSquared">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -77,8 +77,8 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
-            
-            
+
+
             <TabItem Header="Корреляционный анализ">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto">
                     <Grid>
@@ -145,25 +145,9 @@
                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" />
                     </Grid>
                 </ScrollViewer>
-                <!--
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding CorrMatrix}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="{Binding ColumnsCount}" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="Gray" BorderThickness="1" Padding="5" Background="Azure">
-                                    <TextBlock Text="{Binding}" />
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-                -->
             </TabItem>
+
+
             <TabItem Header="Регрессионный анализ">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -171,17 +155,45 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Параметр 'y': " />
-                        <ComboBox ItemsSource="{Binding Parameters}" SelectedIndex="{Binding DependentParameter}" />
+
+                    <StackPanel Orientation="Vertical" Grid.RowSpan="2" Margin="5,0,5,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Параметр 'y': " />
+                            <ComboBox ItemsSource="{Binding Parameters}" SelectedIndex="{Binding DependentParameter}" />
+                        </StackPanel>
+                        <Label Content="Исключение параметров:" FontWeight="Bold" />
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding ParametersForExclusion}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding Name}"
+                                              IsChecked="{Binding IsExcluded, Mode=TwoWay}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        <Button Content="Исключить" Command="{Binding ExcludeParametersCommand}" />
                     </StackPanel>
 
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" Grid.Row="1">
-                        <StackPanel Orientation="Vertical">
+                    
+                    <GridSplitter Grid.RowSpan="2" Grid.Column="1" Width="3" ShowsPreview="True"
+                                  HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+                    
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                  Grid.RowSpan="2" Grid.Column="2">
+                        <StackPanel Orientation="Vertical" Margin="5,0,5,0">
                             <Label Content="Коэффициенты уравнения" FontWeight="Bold" />
                             <DataGrid ItemsSource="{Binding RegressionCoeffs}" IsReadOnly="True"
                               AutoGenerateColumns="False" >
@@ -207,7 +219,7 @@
                             </DataGrid>
 
                             <Label Content="Уравнение регрессии" FontWeight="Bold" />
-                            <TextBlock Text="{Binding RegressionEquationInfo}" />
+                            <TextBlock Text="{Binding RegressionEquationInfo}" FontSize="14" />
 
                             <Label Content="Прогнозирование" FontWeight="Bold" />
                             <Label Content="Введите коэффициенты:" />
@@ -221,12 +233,14 @@
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
-                    
-                    
 
-                    <Label Content="Значения Y" FontWeight="Bold" Grid.Column="1" />
+                    
+                    <GridSplitter Grid.RowSpan="2" Grid.Column="3" Width="3" ShowsPreview="True"
+                                  HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+
+                    <Label Content="Значения Y" FontWeight="Bold" Grid.Column="4" />
                     <DataGrid ItemsSource="{Binding RegressionYs}" IsReadOnly="True"
-                              AutoGenerateColumns="False" Grid.Row="1" Grid.Column="1">
+                              AutoGenerateColumns="False"  Grid.Row="1" Grid.Column="4">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Y" Binding="{Binding Real, StringFormat={}{0:f4}}" />
                             <DataGridTextColumn Header="Выч Y" Binding="{Binding Calculated, StringFormat={}{0:f4}}">

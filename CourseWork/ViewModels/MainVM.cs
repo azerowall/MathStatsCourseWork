@@ -15,6 +15,7 @@ namespace CourseWork.ViewModels
         {
             LoadFileCommand = new Commands.DelegateCommand(LoadFileUsingDialog);
             RegressionCalculateYCommand = new Commands.DelegateCommand(CalcY);
+            ExcludeParametersCommand = new Commands.DelegateCommand(ExcludeParameters);
         }
 
         #region Таблица
@@ -39,8 +40,7 @@ namespace CourseWork.ViewModels
                                     string.Join("\n", Table.ShortedHeaders.Zip(Table.Headers, (s, h) => $"{s} - {h}")) :
                                     string.Empty;
 
-
-
+        
         string _loadedFile;
         public string LoadedFile
         {
@@ -215,18 +215,6 @@ namespace CourseWork.ViewModels
 
         #region Регрессия
 
-        int _dependentParameter;
-        public int DependentParameter
-        {
-            get { return _dependentParameter; }
-            set
-            {
-                _dependentParameter = value;
-                OnPropertyChanged("DependentParameter");
-                if (Table != null)
-                    Regression = new Regression(Table, _dependentParameter);
-            }
-        }
 
         Regression _regr;
         public Regression Regression
@@ -236,9 +224,14 @@ namespace CourseWork.ViewModels
             {
                 _regr = value;
                 OnPropertyChanged("Regression");
-                RegressionCoeffs = Enumerable.Range(0, _regr.Coeffs.Length)
-                                             .Select(i => new RegressionCoefficient(i, _regr, Table, DependentParameter))
-                                             .ToArray();
+
+                RegressionCoefficient[] coeffs = new RegressionCoefficient[_regr.Coeffs.Length];
+                for (int i = 0; i < coeffs.Length; i++)
+                {
+                    string name = i == 0 ? "-" : Table.Headers[_notExcludedParams[i - 1]];
+                    coeffs[i] = new RegressionCoefficient(i, _regr, name);
+                }
+                RegressionCoeffs = coeffs;
                 classificator = new RegressionClassificator(_regr, Table.ColumnsValues[DependentParameter]);
                 RegressionYs = Enumerable.Range(0, _regr.RealY.Length)
                                          .Select(i => new RegressionYInfo(i, _regr, classificator))
@@ -248,27 +241,85 @@ namespace CourseWork.ViewModels
             }
         }
 
+        int _dependentParameter;
+        public int DependentParameter
+        {
+            get { return _dependentParameter; }
+            set
+            {
+                _dependentParameter = value;
+                OnPropertyChanged("DependentParameter");
+                if (Table != null)
+                {
+                    var parametes = Table.ColumnsValues
+                                         .Where((_, i) => i != _dependentParameter)
+                                         .ToArray();
+                    ParametersForExclusion = Enumerable.Range(0, Table.ColumnsCount)
+                                                       .Where(i => i != _dependentParameter)
+                                                       .Select(i => new ParameterExcl(i, Table.Headers[i]))
+                                                       .ToArray();
+                    Regression = new Regression(parametes, Table.ColumnsValues[_dependentParameter]);
+                }
+            }
+        }
+        public class ParameterExcl
+        {
+            public int Index;
+            public string Name { get; private set; }
+            public bool IsExcluded { get; set; }
+            public ParameterExcl(int i, string name)
+            {
+                Index = i; Name = name; IsExcluded = false;
+            }
+        }
+        ParameterExcl[] _paramsForExcl;
+        public ParameterExcl[] ParametersForExclusion
+        {
+            get { return _paramsForExcl; }
+            set
+            {
+                _paramsForExcl = value;
+                OnPropertyChanged("ParametersForExclusion");
+                _notExcludedParams = Enumerable.Range(0, Table.ColumnsCount)
+                                               .Where(i => i != DependentParameter)
+                                               .ToArray();
+            }
+        }
+
+        public int[] _notExcludedParams;
+        public Commands.DelegateCommand ExcludeParametersCommand { get; set; }
+        void ExcludeParameters(object o)
+        {
+            if (ParametersForExclusion == null) return;
+
+            // среди ParametersForExclusion уже нет зависимого,
+            // поэтому и проверку делать не нужно
+            _notExcludedParams = ParametersForExclusion.Where(p => !p.IsExcluded)
+                                                       .Select(p => p.Index)
+                                                       .ToArray();
+            if (_notExcludedParams.Length == 0)
+            {
+                MessageBox.Show("Нельзя исключить все параметры");
+                return;
+            }
+            double[][] parameters = _notExcludedParams.Select(i => Table.ColumnsValues[i])
+                                                      .ToArray();
+            
+            Regression = new Regression(parameters, Table.ColumnsValues[DependentParameter]);
+        }
+
+
         RegressionClassificator classificator;
 
         public class RegressionCoefficient
         {
             int idx;
             Regression regr;
-            Table table;
-            int idxy;
-            public RegressionCoefficient(int i, Regression r, Table t, int iy)
+            public RegressionCoefficient(int i, Regression r, string name)
             {
-                idx = i; regr = r; table = t; idxy = iy;
+                idx = i; regr = r; ParameterName = name;
             }
-            public string ParameterName
-            {
-                get
-                {
-                    if (idx == 0) return "-";
-                    if (idx - 1 < idxy) return table.Headers[idx - 1];
-                    return table.Headers[idx];
-                }
-            }
+            public string ParameterName { get; set; }
             public double Value => regr.Coeffs[idx];
             public double T => regr.CoeffsT[idx];
             public bool IsSignificance => regr.IsSignificanceCoeff(T);
@@ -327,7 +378,6 @@ namespace CourseWork.ViewModels
             sb.AppendLine($"Уравнение: {regr.EquationToString()}");
             return sb.ToString();
         }
-
         string _regrEquationInfo;
         public string RegressionEquationInfo
         {
@@ -343,7 +393,6 @@ namespace CourseWork.ViewModels
         }
 
         public double[] InputtedX { get; set; }
-
         public Commands.DelegateCommand RegressionCalculateYCommand { get; set; }
         void CalcY(object o)
         {
@@ -357,7 +406,6 @@ namespace CourseWork.ViewModels
             OnPropertyChanged("RegressionPredictionInterval");
             OnPropertyChanged("ClassificationClass");
         }
-
         public double RegressionCalculatedY { get; set; }
         public double RegressionPredictionInterval { get; set; }
         public double ClassificationClass { get; set; }

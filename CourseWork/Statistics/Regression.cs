@@ -28,12 +28,12 @@ namespace CourseWork
         double[,] XTXInvMat;
         double S2;
 
-        public Regression(Table tbl, int iy)
+        public Regression(double[][] columns, double[] y)
         {
-            XMat = TableToMatrix(tbl, iy);
+            XMat = TableToMatrix(columns);
             XTXInvMat = Matrix.GetInverse(Matrix.Mul(Matrix.GetTranspose(XMat), XMat));
 
-            RealY = (double[])tbl.ColumnsValues[iy].Clone();
+            RealY = (double[])y.Clone();
             Coeffs = CalcRegressionCoeffs(XMat, RealY);
             CalculatedY = Matrix.MulVect(XMat, Coeffs);
 
@@ -46,19 +46,17 @@ namespace CourseWork
         /// <param name="tbl"></param>
         /// <param name="iy"></param>
         /// <returns></returns>
-        private static double[,] TableToMatrix(Table tbl, int iy)
+        private static double[,] TableToMatrix(double[][] columns)
         {
-            double[,] mat = new double[tbl.RowsCount, tbl.ColumnsCount];
+            int rowsCount = columns[0].Length;
+            int colsCount = columns.Length;
+
+            double[,] mat = new double[rowsCount, colsCount + 1];
             for (int i = 0; i < mat.GetLength(0); i++)
             {
                 mat[i, 0] = 1;
                 for (int j = 1; j < mat.GetLength(1); j++)
-                {
-                    if (j <= iy)
-                        mat[i, j] = tbl[i, j - 1];
-                    else
-                        mat[i, j] = tbl[i, j];
-                }
+                    mat[i, j] = columns[j - 1][i];
             }
             return mat;
         }
